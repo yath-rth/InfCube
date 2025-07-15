@@ -26,9 +26,9 @@ public class UpgradeManager : MonoBehaviour
     {
         if (GameManager.instance != null)
         {
-            if (GameManager.instance.score - lastRecorededScore >= threshold)
+            if (PointsManager.instance.score - lastRecorededScore >= threshold)
             {
-                lastRecorededScore = GameManager.instance.score; // Update the last recorded score
+                lastRecorededScore = PointsManager.instance.score; // Update the last recorded score
                 if(upgradeUI != null) upgradeUI.SetActive(true); // Show the upgrade UI when the score threshold is reached
             }
         }

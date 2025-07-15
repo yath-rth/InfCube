@@ -4,6 +4,7 @@ using System.IO;
 
 public interface ISaveFuncs
 {
-    void LoadData(PlayerData data);
-    void SaveData(PlayerData data); 
+    string id { get; }
+    void LoadData(object data);
+    object SaveData(); 
 }

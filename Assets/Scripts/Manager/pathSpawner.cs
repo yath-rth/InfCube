@@ -6,8 +6,6 @@ public class pathSpawner : MonoBehaviour
 {
     ObjectPooler pool;
 
-    [SerializeField] Transform player;
-
     [Range(0, 2f)]public float tileSize;
     [SerializeField, Range(0, 20)] int minLength_min, maxLength_min, minLength_max, maxLength_max;
     [SerializeField] double maxSpawnTime, minSpawnTime;
@@ -17,7 +15,7 @@ public class pathSpawner : MonoBehaviour
     GameObject spawnedTile;
     Vector3 spawnPos;
 
-    void Awake()
+    void Start()
     {
         startCount = 5;
         pool = ObjectPooler.instance;
@@ -30,7 +28,7 @@ public class pathSpawner : MonoBehaviour
         maxLength = Random.Range(maxLength_min, maxLength_max);
         count = Random.Range(minLength, maxLength);
         if (side == -1) side = Random.Range(0, 2);
-        if (player != null) player.gameObject.GetComponent<player>().temp_side = (side == 0) ? -1 : 1;
+        if (player.instance != null) player.instance.changeDir(side); //To make the player move in the right direction the first time they click or else they might go in the wrong direction
 
         timeBTWspawns = minSpawnTime;
     }
@@ -41,7 +39,7 @@ public class pathSpawner : MonoBehaviour
         {
             lastTime += Time.deltaTime;
 
-            timeBTWspawns += Time.deltaTime * 0.0001f;
+            timeBTWspawns += Time.deltaTime;
             if (timeBTWspawns > maxSpawnTime) timeBTWspawns = maxSpawnTime;
 
             if (count <= 0)
@@ -55,7 +53,7 @@ public class pathSpawner : MonoBehaviour
 
             if (lastTime > timeBTWspawns && !GameManager.instance.isGameOver && sceneManager.GameState == 1)
             {
-                lastTime = 0f;
+                lastTime = 0.0;
 
                 if (pool != null)
                 {
@@ -77,7 +75,7 @@ public class pathSpawner : MonoBehaviour
                         count--;
 
                         coinChance = Random.Range(0f, 1f);
-                        if (coinChance < 0.3f) //Make the -1f to 0.1f if you want to start spawning coins again
+                        if (coinChance < 0.1f) //Make the -1f to 0.1f if you want to start spawning coins again
                         {
                             GameObject coin = pool.GetObject(1);
                             coin.transform.position = new Vector3(spawnedTile.transform.position.x, 0.5f, spawnedTile.transform.position.z);

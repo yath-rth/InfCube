@@ -12,11 +12,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7aa45f6493abfda43a73ff50e40fbba7, type: 3}
   m_Name: Color 1
   m_EditorClassIdentifier: 
-  itemImage: {fileID: 0}
-  itemImageTint: {r: 1, g: 1, b: 1, a: 1}
-  itemName: 
-  itemPrice: 0
+  itemImage: {fileID: 21300000, guid: f5fb7f73f1dfed74daa1ea2fe298843c, type: 3}
+  itemImageTint: {r: 0.99607843, g: 0.23578037, b: 0.19999996, a: 1}
+  itemName: Color
+  itemPrice: 100
   itemDescription: 
-  itemQuantity: 0
+  itemQuantity: 1
   isPurchased: 0
-  effects: []
+  effects:
+  - {fileID: 11400000, guid: bdec52ea8daf37a43ae60a7c3a1c0f49, type: 2}

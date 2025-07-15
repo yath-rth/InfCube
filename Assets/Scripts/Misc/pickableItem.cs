@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class pickableItem : MonoBehaviour
+public class PowerUpItem : MonoBehaviour
 {
     [SerializeField] GameObject coinMesh, coinParticles;
 
@@ -16,7 +16,7 @@ public class pickableItem : MonoBehaviour
         if (other.gameObject.layer == 10)
         {
             if (coinMesh != null) coinMesh.SetActive(false);
-            if (GameManager.instance != null) GameManager.instance.addCoin();
+            if (GameManager.instance != null) PointsManager.instance.addCoin();
             if (coinParticles != null) coinParticles.SetActive(true);
             StartCoroutine(collected());
         }

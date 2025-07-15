@@ -21,13 +21,11 @@ public class sceneManager : MonoBehaviour
     {
         if (instance != null) Destroy(instance.gameObject);
         instance = this;
-
-        if (highScoreText != null) highScoreText.text = PlayerPrefs.GetInt("HighScore", 0).ToString("D5");
     }
 
     public void Game()
     {
-        if (GameState == 0 && Time.timeSinceLevelLoad > 2f)
+        if (GameState == 0 && Time.timeSinceLevelLoad > 1f)
         {
             if (cube != null) cube.transform.DOScale(Vector3.one * 10, .25f).OnComplete(() =>
             {
@@ -47,7 +45,6 @@ public class sceneManager : MonoBehaviour
 
     public void MainMenu()
     {
-        Debug.Log(Time.time);
         if (mainmenuIndex != -1) SceneManager.LoadScene(gameIndex);
         Time.timeScale = 1;
         GameState = 0;

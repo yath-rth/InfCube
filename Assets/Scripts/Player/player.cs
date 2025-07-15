@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -5,6 +6,11 @@ using UnityEngine;
 public class player : MonoBehaviour, ISaveFuncs
 {
     public static player instance;
+
+    public Action playerDied;
+
+    [SerializeField] string id;
+    string ISaveFuncs.id => id;
 
     GameObject tileFaller, Scorer;
     Controls controls;
@@ -16,7 +22,7 @@ public class player : MonoBehaviour, ISaveFuncs
     [SerializeField, Range(0, 1f)] float speedIncrement;
     [SerializeField, Range(0, 100f)] float gravity, rotationSpeed;
 
-    public int side = 0, temp_side = 0;
+    int side = 0, temp_side = 0;
     float _speed = 0;
     Vector3 velocity, move, cameraOffset;
     Quaternion rotation;
@@ -67,14 +73,29 @@ public class player : MonoBehaviour, ISaveFuncs
         controls.Disable();
     }
 
-    void ISaveFuncs.LoadData(PlayerData data)
+    void ISaveFuncs.LoadData(object data)
     {
-
+        if (data is PlayerData d)
+        {
+            Debug.Log("Save Opened");
+        }
     }
 
-    void ISaveFuncs.SaveData(PlayerData data)
+    object ISaveFuncs.SaveData()
     {
+        return new PlayerData
+        {
+            posx = transform.position.x,
+            posz = transform.position.z,
+            speed = _speed
+        };
+    }
 
+    class PlayerData
+    {
+        public float posx;
+        public float posz;
+        public float speed;
     }
 
     void Update()
@@ -90,7 +111,7 @@ public class player : MonoBehaviour, ISaveFuncs
             if (tileFaller != null) tileFaller.SetActive(true);
             if (Scorer != null) Scorer.SetActive(true);
 
-            if (transform.position.y < -1 && gameManager != null) gameManager.GameOver();
+            if (transform.position.y < -1 && gameManager != null && !gameManager.isGameOver) playerDied?.Invoke();
 
             if (!cc.isGrounded) velocity.y -= gravity * Time.deltaTime;
             else velocity.y = 0;
@@ -128,7 +149,16 @@ public class player : MonoBehaviour, ISaveFuncs
 
     void turn()
     {
-        temp_side *= -1;
-        side = temp_side;
+        if (sceneManager.GameState == 1)
+        {
+            temp_side *= -1;
+            side = temp_side;
+        }
+    }
+
+    public void changeDir(int side)
+    {
+        if (side == 0) temp_side = -1;
+        else if (side == 1) temp_side = 1;
     }
 }

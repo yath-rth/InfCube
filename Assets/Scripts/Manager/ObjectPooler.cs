@@ -9,17 +9,9 @@ public class ObjectPooler : MonoBehaviour
 
     public List<objectPoolItems> items;
 
-    private void OnDestroy()
-    {
-        if (instance == this)
-        {
-            instance = null;
-        }
-    }
-
     private void Awake()
     {
-        if (instance != null) Destroy(instance.gameObject);
+        if (instance != null) Destroy(this);
         instance = this;
 
         for (int i = 0; i < items.Count; i++)

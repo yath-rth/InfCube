@@ -3,22 +3,21 @@ using UnityEngine;
 public class PowerUpManager : MonoBehaviour
 {
     public static PowerUpManager instance; // Singleton instance of the PowerUpManager
-
     public PowerUpScriptableObject[] powerUps;
     public PowerUpScriptableObject activePowerUp;
-    public GameObject activePowerUpGameObject { get; private set; } // The currently active power-up GameObject
-
     float spawnedTime = 0f;
 
     void Awake()
     {
         if (instance != null) Destroy(this);
         instance = this;
+
+        pickableItem.OnItemPick += ActivatePowerUp;
     }
 
     public void Update()
     {
-        if(activePowerUp != null && activePowerUpGameObject != null)
+        if (activePowerUp != null)
         {
             // Check if the power-up duration has expired
             if (Time.time - spawnedTime > activePowerUp.duration) RemoveActivePowerUp();
@@ -27,7 +26,9 @@ public class PowerUpManager : MonoBehaviour
 
     public void SpawnPowerUp(Vector3 position)
     {
-        if (activePowerUp == null)
+        float a = Random.Range(0f, 1f);
+
+        if (a < -0.3f) //Change the number to a negative number to stop spawning powerups
         {
             if (powerUps.Length == 0)
             {
@@ -36,11 +37,15 @@ public class PowerUpManager : MonoBehaviour
             }
 
             int randomIndex = Random.Range(0, powerUps.Length);
-            activePowerUp = powerUps[randomIndex];
-            activePowerUpGameObject = Instantiate(activePowerUp.powerUpPrefab, position, Quaternion.identity, transform);//Can be configured to use a object pool instead of instantiating every time
+            GameObject powerUp = Instantiate(powerUps[randomIndex].powerUpPrefab, position, Quaternion.identity, transform);//Can be configured to use a object pool instead of instantiating every time}
+        }
+    }
 
-            activePowerUpGameObject.name = activePowerUp.powerUpName;
-
+    public void ActivatePowerUp(PowerUpScriptableObject obj)
+    {
+        if (activePowerUp == null)
+        {
+            activePowerUp = obj;
             foreach (PowerUpEffects effect in activePowerUp.effects)
             {
                 effect.ApplyEffect(activePowerUp);
@@ -49,7 +54,7 @@ public class PowerUpManager : MonoBehaviour
             spawnedTime = Time.time; // Record the time when the power-up was spawned
         }
     }
-    
+
     public void RemoveActivePowerUp()
     {
         if (activePowerUp != null)
@@ -59,9 +64,7 @@ public class PowerUpManager : MonoBehaviour
                 effect.RemoveEffect(activePowerUp);
             }
 
-            Destroy(activePowerUpGameObject);
             activePowerUp = null;
-            activePowerUpGameObject = null;
         }
     }
 }
