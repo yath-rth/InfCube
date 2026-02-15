@@ -11,5 +11,5 @@ public class UpgradeItem
     public string itemDescription;// Description of the item to be displayed in the shop
     public int itemQuantity = 1;
     public bool isPurchased = false; // Flag to check if the item is purchased
-    public UpgradeItemEffects[] effects;// Event to register all the fuctions which need to be called on purchase of item
+    public ItemEffectBase[] effects;// Event to register all the fuctions which need to be called on purchase of item
 }

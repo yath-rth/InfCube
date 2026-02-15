@@ -3,15 +3,12 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+[RequireComponent(typeof(CharacterController))]
 public class player : MonoBehaviour, ISaveFuncs
 {
     public static player instance;
-
     public Action playerDied;
-
-    [SerializeField] string id;
-    string ISaveFuncs.id => id;
-
+    string ISaveFuncs.id => "Player";
     GameObject tileFaller, Scorer;
     Controls controls;
     CharacterController cc;
@@ -26,6 +23,8 @@ public class player : MonoBehaviour, ISaveFuncs
     float _speed = 0;
     Vector3 velocity, move, cameraOffset;
     Quaternion rotation;
+    [SerializeField] bool localMultiplayerMode;
+    [SerializeField] bool RightOrLeft;
 
     void Awake()
     {
@@ -44,7 +43,13 @@ public class player : MonoBehaviour, ISaveFuncs
 
         controls = new Controls();
 
-        controls.movement.turn.performed += ctx => turn();
+        if (!localMultiplayerMode) controls.movement.turn_singlePlayer.performed += ctx => turn();
+        else
+        {
+            if (!RightOrLeft) controls.movement.turn_leftPlayer.performed += ctx => turn();
+            else controls.movement.turn_righPlayer.performed += ctx => turn();
+        }
+
         controls.movement.escape.performed += ctx => gameManager.close();
         controls.movement.mainMenu.performed += ctx => gameManager.mainMenu();
         controls.movement.space.performed += ctx => gameManager.restart();
@@ -104,9 +109,11 @@ public class player : MonoBehaviour, ISaveFuncs
         {
             if (tileFaller != null) tileFaller.SetActive(false);
             if (Scorer != null) Scorer.SetActive(false);
+
+            return;
         }
 
-        if (cc != null && sceneManager.GameState == 1)
+        if (sceneManager.GameState == 1)
         {
             if (tileFaller != null) tileFaller.SetActive(true);
             if (Scorer != null) Scorer.SetActive(true);
@@ -122,7 +129,7 @@ public class player : MonoBehaviour, ISaveFuncs
                 _speed += speedIncrement * Time.deltaTime;
                 _speed = Mathf.Clamp(_speed, minSpeed, maxSpeed);
 
-                move = new Vector3(side * _speed, velocity.y, _speed).normalized;
+                move = new Vector3(side, velocity.y, 1f).normalized;
                 cc.Move(move * Time.deltaTime * _speed);
 
                 rotation = Quaternion.Euler(0, side * 45f, 0);
@@ -136,9 +143,18 @@ public class player : MonoBehaviour, ISaveFuncs
                 move = new Vector3(0, velocity.y, 0);
                 cc.Move(move * Time.deltaTime);
                 if (moveParticles != null) moveParticles.gameObject.SetActive(false);
-
             }
         }
+    }
+
+    public float getSpeed()
+    {
+        return _speed;
+    }
+
+    public float getGravity()
+    {
+        return _speed;
     }
 
     public void DecreaseSpeed(float decreaseAmt)

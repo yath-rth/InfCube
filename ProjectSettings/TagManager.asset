@@ -17,10 +17,10 @@ TagManager:
   - Coin
   - Tile Faller
   - Score Counter
-  - 
-  - 
-  - 
-  - 
+  - GhostTiles
+  - GhostFaller
+  - GhostPlayer
+  - GhostScoreCounter
   - 
   - 
   - 

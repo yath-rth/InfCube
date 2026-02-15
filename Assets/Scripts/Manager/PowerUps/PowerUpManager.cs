@@ -46,7 +46,7 @@ public class PowerUpManager : MonoBehaviour
         if (activePowerUp == null)
         {
             activePowerUp = obj;
-            foreach (PowerUpEffects effect in activePowerUp.effects)
+            foreach (ItemEffectBase effect in activePowerUp.effects)
             {
                 effect.ApplyEffect(activePowerUp);
             }
@@ -59,7 +59,7 @@ public class PowerUpManager : MonoBehaviour
     {
         if (activePowerUp != null)
         {
-            foreach (PowerUpEffects effect in activePowerUp.effects)
+            foreach (ItemEffectBase effect in activePowerUp.effects)
             {
                 effect.RemoveEffect(activePowerUp);
             }

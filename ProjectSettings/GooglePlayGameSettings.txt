@@ -1,5 +1,5 @@
-lastUpgrade=20000
-proj.pluginVersion=2.0.0
+lastUpgrade=01015
+proj.pluginVersion=0.10.15
 proj.AppId=151681202218
 and.BundleId=com.Yatharth.infCube
 proj.classDir=Assets

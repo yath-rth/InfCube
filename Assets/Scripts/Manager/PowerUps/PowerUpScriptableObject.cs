@@ -7,5 +7,5 @@ public class PowerUpScriptableObject : ScriptableObject
     public string powerUpName;
     public string description;
     public float duration;
-    public PowerUpEffects[] effects;
+    public ItemEffectBase[] effects;
 }

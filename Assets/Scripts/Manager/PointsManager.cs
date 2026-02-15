@@ -11,7 +11,7 @@ public class PointsManager : MonoBehaviour, ISaveFuncs
     int coins = 0;
     public int score { get; private set; }
     public int lastScore { get; private set; }
-    public int highScore { get; private set; }
+    public int highScore;
     public int Allcoins { get; private set; }
 
     public string id => saveName;
@@ -41,7 +41,7 @@ public class PointsManager : MonoBehaviour, ISaveFuncs
         score += value;
         scoreAddedEvent?.Invoke(score);
 
-        if (score > highScore) highScore = score;
+        if(score > highScore) highScore = score;
     }
 
     public void LoadData(object data)

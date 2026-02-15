@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "849266892349",
+    "project_id": "infcube-290",
+    "storage_bucket": "infcube-290.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:849266892349:android:bed439fa39fda763d31454",
+        "android_client_info": {
+          "package_name": "com.Yatharth.infCube"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBVVtFc4KfliKGcTDTiiPCMAB8DDCDrFKM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

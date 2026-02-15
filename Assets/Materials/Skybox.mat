@@ -45,8 +45,8 @@ Material:
     - _QueueOffset: 0
     - _XRMotionVectorsPass: 1
     m_Colors:
-    - _HorizonColor: {r: 0.83921576, g: 0.27058825, b: 0.2901961, a: 0}
-    - _SkyColor: {r: 0.45882356, g: 0.7568628, b: 0.8588236, a: 0}
+    - _HorizonColor: {r: 0.8, g: 0.2824634, b: 0.2588236, a: 0}
+    - _SkyColor: {r: 0.7647059, g: 0.76124066, b: 0.18823528, a: 0}
     - _Stars_Color: {r: 0.99999994, g: 0.99999994, b: 0.99999994, a: 0}
   m_BuildTextureStacks: []
   m_AllowLocking: 1
@@ -62,4 +62,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d0353a89b1f911e48b9e16bdc9f2e058, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  version: 9
+  version: 10

@@ -1,13 +1,13 @@
 using UnityEngine;
 
 [CreateAssetMenu(menuName = "Upgrade Item Effects/Decrease Speed")]
-public class DecreaseSpeed : UpgradeItemEffects
+public class DecreaseSpeed : ItemEffectBase
 {
     public float speedDecreaseAmount = 0.5f; // Amount to decrease the speed by
 
-    public override void Apply(UpgradeItem item)
+    public override void ApplyEffect(object obj)
     {
-        if (item != null)
+        if (obj is UpgradeItem item)
         {
             // Assuming the player has a method to decrease speed
             player player = GameObject.FindWithTag("Player").GetComponent<player>();
@@ -16,5 +16,10 @@ public class DecreaseSpeed : UpgradeItemEffects
                 player.DecreaseSpeed(speedDecreaseAmount);
             }
         }
+    }
+
+    public override void RemoveEffect(object obj)
+    {
+        throw new System.NotImplementedException();
     }
 }

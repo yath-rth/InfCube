@@ -15,9 +15,10 @@ MonoBehaviour:
   itemImage: {fileID: 21300000, guid: f5fb7f73f1dfed74daa1ea2fe298843c, type: 3}
   itemImageTint: {r: 0.477223, g: 0.99607843, b: 0.19999996, a: 1}
   itemName: Color
-  itemPrice: 100
   itemDescription: 
-  itemQuantity: 1
-  isPurchased: 0
+  parameters:
+    itemPrice: 100
+    itemQuantity: 1
+    isPurchased: 0
   effects:
   - {fileID: 11400000, guid: bdec52ea8daf37a43ae60a7c3a1c0f49, type: 2}

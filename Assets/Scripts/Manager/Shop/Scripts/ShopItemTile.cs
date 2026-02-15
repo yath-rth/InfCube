@@ -26,7 +26,7 @@ public class ShopItemTile : MonoBehaviour
 
         if (tileText != null) // Check if the text component are not null
         {
-            tileText.text = item.itemPrice.ToString(); // Set the item price text
+            tileText.text = item.parameters.itemPrice.ToString(); // Set the item price text
         }
         else Debug.LogError("Text component or item price is null for tile at index ");
     }

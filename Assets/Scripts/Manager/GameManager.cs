@@ -1,10 +1,7 @@
 using System.Collections;
-using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using DG.Tweening;
-//using GooglePlayGames;
-//using GooglePlayGames.BasicApi;
 
 public class GameManager : MonoBehaviour
 {
@@ -16,7 +13,7 @@ public class GameManager : MonoBehaviour
     public bool isGameOver = false;
 
     [SerializeField] TMP_Text scoreText, endScreenScoreText, pauseScreenScoreText, highScoreText, coinsText;
-    [SerializeField] GameObject scoreText_obj, endScreen_Obj, deathParticles, otherUI_obj, pauseScreen_obj, mainMenu_obj, shopMenu_obj;
+    [SerializeField] GameObject scoreText_obj, endScreen_Obj, deathParticles, otherUI_obj, pauseScreen_obj, mainMenu_obj, shopMenu_obj, leaderboard_obj;
 
     int gameState = 1;
 
@@ -30,9 +27,6 @@ public class GameManager : MonoBehaviour
 
     void Start()
     {
-        Application.targetFrameRate = -1;
-        LoginToGooglePlay();
-
         Player = player.instance;
         sceneManager = GetComponent<sceneManager>();
 
@@ -77,20 +71,6 @@ public class GameManager : MonoBehaviour
         PointsManager.instance.scoreAddedEvent -= updateScore;
         if (Player != null) Player.playerDied -= OnPlayerDied;
     }
-
-    void LoginToGooglePlay()
-    {
-        //PlayGamesPlatform.Instance.Authenticate(ProcessAuthentication);
-    }
-
-    // internal void ProcessAuthentication(SignInStatus status)
-    // {
-    //     if (status == SignInStatus.Success)
-    //     {
-    //         isPlayConnected = true;
-    //     }
-    //     else isPlayConnected = false;
-    // }
 
     void Awake()
     {
@@ -156,10 +136,9 @@ public class GameManager : MonoBehaviour
         gameState = 0;
         isGameOver = true;
 
-        if (SaveManager.Instance != null)
-        {
-            SaveManager.Instance.SaveData();
-        }
+        if (SaveManager.Instance != null) SaveManager.Instance.SaveData();
+        if (LeaderboardManager.instance != null && PointsManager.instance != null) LeaderboardManager.instance.AddPlayerScore(PointsManager.instance.highScore);
+
 
         if (transition != null)
         {
@@ -214,6 +193,10 @@ public class GameManager : MonoBehaviour
         {
             // if (isPlayConnected == false) LoginToGooglePlay();
             // PlayGamesPlatform.Instance.ShowLeaderboardUI(GPGSIds.leaderboard_high_scores);
+
+            if (leaderboard_obj != null) leaderboard_obj.SetActive(true);
+            if (mainMenu_obj != null) mainMenu_obj.SetActive(false);
+            sceneManager.GameState = 3;
         }
     }
 
@@ -243,6 +226,12 @@ public class GameManager : MonoBehaviour
             sceneManager.instance.GameView();
             if (mainMenu_obj != null) mainMenu_obj.SetActive(true);
             if (shopMenu_obj != null) shopMenu_obj.SetActive(false);
+            sceneManager.GameState = 0;
+        }
+        else if (sceneManager.GameState == 3)
+        {
+            if (mainMenu_obj != null) mainMenu_obj.SetActive(true);
+            if (leaderboard_obj != null) leaderboard_obj.SetActive(false);
             sceneManager.GameState = 0;
         }
         else if (sceneManager.GameState == 0)

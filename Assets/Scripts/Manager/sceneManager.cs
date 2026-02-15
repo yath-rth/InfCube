@@ -15,11 +15,11 @@ public class sceneManager : MonoBehaviour
     [SerializeField] GameObject[] tiles;
     [SerializeField] int gameIndex = -1, mainmenuIndex = -1;
     [SerializeField] TMP_Text highScoreText;
-    [SerializeField] CinemachineVirtualCamera gameCam, shopCam;
+    [SerializeField] CinemachineVirtualCamera gameCam, shopCam, mainMenuCam;
 
     private void Awake()
     {
-        if (instance != null) Destroy(instance.gameObject);
+        if (instance != null) Destroy(this);
         instance = this;
     }
 
@@ -38,6 +38,8 @@ public class sceneManager : MonoBehaviour
 
                 Time.timeScale = 1;
                 GameState = 1;
+                gameCam.Priority = 10;
+                mainMenuCam.Priority = 0;
                 GameManager.instance.gameStart();
             });
         }
@@ -48,6 +50,9 @@ public class sceneManager : MonoBehaviour
         if (mainmenuIndex != -1) SceneManager.LoadScene(gameIndex);
         Time.timeScale = 1;
         GameState = 0;
+        mainMenuCam.Priority = 10;
+        gameCam.Priority = 0;
+        shopCam.Priority = 0;
     }
 
     public void ShopView()

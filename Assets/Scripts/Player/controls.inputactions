@@ -1,4 +1,5 @@
 {
+    "version": 1,
     "name": "controls",
     "maps": [
         {
@@ -69,9 +70,27 @@
                     "initialStateCheck": false
                 },
                 {
-                    "name": "turn",
+                    "name": "turn_singlePlayer",
                     "type": "Button",
                     "id": "1f64fe70-7cd8-48bf-9414-d126be5ba3e0",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "turn_righPlayer",
+                    "type": "Button",
+                    "id": "51bcad58-25d2-4702-812e-0df3c682ab5b",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "turn_leftPlayer",
+                    "type": "Button",
+                    "id": "9cfed8dc-6947-4da8-a98c-765402862bbf",
                     "expectedControlType": "",
                     "processors": "",
                     "interactions": "",
@@ -185,18 +204,40 @@
                     "interactions": "",
                     "processors": "",
                     "groups": "",
-                    "action": "turn",
+                    "action": "turn_singlePlayer",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },
                 {
                     "name": "",
-                    "id": "9c89887a-db38-4b50-b6b4-0bc9d473faed",
+                    "id": "7364cc8c-c1c2-4542-810e-263c1862732f",
                     "path": "<Keyboard>/upArrow",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
-                    "action": "turn",
+                    "action": "turn_singlePlayer",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "1cf3f7b7-c510-40af-af25-ddcd84021734",
+                    "path": "<Keyboard>/upArrow",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "turn_righPlayer",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "a6867ca1-5ac1-4778-a751-89f1b71caa9e",
+                    "path": "<Keyboard>/w",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "turn_leftPlayer",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }
