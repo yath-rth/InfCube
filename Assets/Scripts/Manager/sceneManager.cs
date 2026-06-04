@@ -11,7 +11,7 @@ public class sceneManager : MonoBehaviour
     public static sceneManager instance;
     public static int GameState = 0;
 
-    [SerializeField] GameObject cube;
+    [SerializeField] GameObject cube, startTiles;
     [SerializeField] GameObject[] tiles;
     [SerializeField] int gameIndex = -1, mainmenuIndex = -1;
     [SerializeField] TMP_Text highScoreText;
@@ -30,6 +30,7 @@ public class sceneManager : MonoBehaviour
             if (cube != null) cube.transform.DOScale(Vector3.one * 10, .25f).OnComplete(() =>
             {
                 cube.SetActive(false);
+                startTiles.SetActive(false);
 
                 for (int i = 0; i < tiles.Length; i++)
                 {

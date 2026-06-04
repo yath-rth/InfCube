@@ -3204,6 +3204,7 @@ MonoBehaviour:
   tileSize: 1.25
   minLength_min: 1
   maxLength_max: 4
+  tilesAhead: 1.3
   spawnTimeCurve:
     serializedVersion: 2
     m_Curve:
@@ -3228,9 +3229,7 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
-  maxSpawnTime: 0.22
-  minSpawnTime: 0.225
-  startTile: {fileID: 1612865959}
+  startTile: {fileID: 419606169}
   ghost: 0
 --- !u!114 &611125900
 MonoBehaviour:
@@ -3245,7 +3244,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   items:
-  - StartSize: 30
+  - StartSize: 1000
     Prefab: {fileID: 2330495716966832453, guid: af71867a88c19194e9346227b0549841,
       type: 3}
   - StartSize: 10
@@ -3294,6 +3293,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   cube: {fileID: 1495451983}
+  startTiles: {fileID: 1473153388}
   tiles:
   - {fileID: 667778665}
   - {fileID: 1418885872}
@@ -12922,7 +12922,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &1613162275
 Transform:
   m_ObjectHideFlags: 0
@@ -18110,7 +18110,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &1711577416
 Transform:
   m_ObjectHideFlags: 0
@@ -18894,7 +18894,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &1937924731
 Transform:
   m_ObjectHideFlags: 0
@@ -20125,7 +20125,7 @@ Transform:
   m_GameObject: {fileID: 235048820181587118}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: -0.7, z: 0}
+  m_LocalPosition: {x: 0, y: -0.5, z: -0.139}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -20853,7 +20853,7 @@ ParticleSystem:
     startLifetime:
       serializedVersion: 2
       minMaxState: 0
-      scalar: 2
+      scalar: 1
       minScalar: 5
       maxCurve:
         serializedVersion: 2
@@ -20906,7 +20906,7 @@ ParticleSystem:
     startSpeed:
       serializedVersion: 2
       minMaxState: 0
-      scalar: 0.2
+      scalar: 2
       minScalar: 5
       maxCurve:
         serializedVersion: 2
@@ -21024,7 +21024,7 @@ ParticleSystem:
     startSize:
       serializedVersion: 2
       minMaxState: 0
-      scalar: 0.2
+      scalar: 0.15
       minScalar: 1
       maxCurve:
         serializedVersion: 2
@@ -21401,15 +21401,15 @@ ParticleSystem:
   ShapeModule:
     serializedVersion: 6
     enabled: 1
-    type: 0
-    angle: 25
+    type: 4
+    angle: 10.88
     length: 5
     boxThickness: {x: 0, y: 0, z: 0}
     radiusThickness: 1
     donutRadius: 0.2
     m_Position: {x: 0, y: 0, z: 0}
-    m_Rotation: {x: 0, y: 0, z: 0}
-    m_Scale: {x: 1, y: 0.1, z: 1}
+    m_Rotation: {x: 0, y: 180, z: 0}
+    m_Scale: {x: 1, y: 1, z: 1}
     placementMode: 0
     m_MeshMaterialIndex: 0
     m_MeshNormalOffset: 0
@@ -21488,7 +21488,7 @@ ParticleSystem:
     sphericalDirectionAmount: 0
     randomPositionAmount: 0
     radius:
-      value: 0.11
+      value: 0.14
       mode: 0
       spread: 0
       speed:
@@ -25712,11 +25712,26 @@ MonoBehaviour:
   cam: {fileID: 391557120}
   bgParticles: {fileID: 8999540553217143311}
   moveParticles: {fileID: 2654008761471957927}
-  minSpeed: 5.4
-  maxSpeed: 5.9
+  minSpeed: 3.32
+  maxSpeed: 5.21
   speedIncrement: 0.002
   gravity: 11.2
   rotationSpeed: 33.5
+  moving:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 611125899}
+        m_TargetAssemblyTypeName: pathSpawner, Assembly-CSharp
+        m_MethodName: move
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
   localMultiplayerMode: 0
   RightOrLeft: 0
 --- !u!143 &8088208788021677048

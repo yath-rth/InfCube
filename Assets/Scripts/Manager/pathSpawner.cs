@@ -1,181 +1,260 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Events;
+using UnityEngine.UIElements;
 
 public class pathSpawner : MonoBehaviour, ISaveFuncs
 {
     public static pathSpawner instance;
+
     ObjectPooler pool;
     [SerializeField] player player;
     [Range(0, 2f)] public float tileSize;
     [SerializeField, Range(0, 20)] int minLength_min, maxLength_max;
+    [SerializeField, Range(0f, 10f)] float tilesAhead;
     [SerializeField] AnimationCurve spawnTimeCurve;
-    [SerializeField] float maxSpawnTime, minSpawnTime;
-    float timeBTWspawns, timer = 0f;
-    int count, side = -1, startCount = 8;
-    double lastTime = 0f, coinChance = 0f;
-    GameObject spawnedTile;
-    Vector3 spawnPos;
     [SerializeField] Transform startTile;
     [SerializeField] bool ghost;
+    float timer = 0f;
+    int count, side = -1, startCount = 10;
+    double coinChance = 0f;
+    GameObject spawnedTile;
+    Vector3 spawnPos, mirrorPos;
+
+    List<Transform> spawnedTiles = new List<Transform>();
+    List<Transform> spawnedObjs = new List<Transform>();
+    List<Transform> spawnedGhostTiles = new List<Transform>();
     List<PathSpawnData> currentPath = new List<PathSpawnData>();
     List<PathSpawnData> previousPath = new List<PathSpawnData>();
-    string ISaveFuncs.id => "PathSpawner";
-    public static event Action<List<PathSpawnData>> pathInfoEvent;
 
-    //Previous path data
     int pSide = 0, pCount = 0, pIndex = 0;
     Vector3 pPosition = Vector3.zero;
 
-    private void Awake() {
-        if(instance != null) Destroy(this);
+    string ISaveFuncs.id => "PathSpawner";
+    public static event Action<List<PathSpawnData>> pathInfoEvent;
+
+    // ─────────────────────────────────────────────
+    // Lifecycle
+    // ─────────────────────────────────────────────
+
+    private void Awake()
+    {
+        if (instance != null) Destroy(this);
         instance = this;
     }
 
     void Start()
     {
-        startCount = 5;
-        currentPath.Add(new PathSpawnData(-1, startCount));
-
         pool = ObjectPooler.instance;
-        spawnPos = Vector3.zero;
-        if (startTile != null) spawnPos = new Vector3(startTile.position.x, startTile.position.y, startTile.position.z + tileSize);
-
-        pPosition = spawnPos;
-
         if (player == null) player = player.instance;
 
-        //if (player != null) player.position = new Vector3(0, player.position.y, spawnPos.z);
+        spawnPos = startTile != null ? startTile.position : Vector3.zero;
+        mirrorPos = spawnPos;
+        pPosition = spawnPos;
+        spawnStartTile();
 
+        currentPath.Add(new PathSpawnData(-1, startCount));
+
+        side = UnityEngine.Random.Range(0, 2);
         count = UnityEngine.Random.Range(minLength_min, maxLength_max);
-
-        if (side == -1) side = UnityEngine.Random.Range(0, 2);
-
         currentPath.Add(new PathSpawnData(side, count));
 
-        if (player != null) player.changeDir(side); //To make the player move in the right direction the first time they click or else they might go in the wrong direction only use when keeping the input using 1 button if u give 2 button input no point
+        if (player != null) player.changeDir(side);
 
-        timeBTWspawns = minSpawnTime;
         timer = 0;
-
-        Debug.Log(Time.fixedDeltaTime);
 
         if (SaveManager.Instance != null)
         {
             SaveManager.Instance.RegisterObject(this);
             SaveManager.Instance.LoadDataForObject(this);
-            Debug.Log("Loaded data for path spawner");
-
             pathInfoEvent?.Invoke(previousPath);
         }
     }
 
-    void Update()
+    // ─────────────────────────────────────────────
+    // World movement (called from player.cs)
+    // ─────────────────────────────────────────────
+
+    public void move(Vector3 delta)
     {
-        if (sceneManager.GameState == 1)
+        foreach (Transform tile in spawnedTiles)
+            tile.position -= delta;
+
+        foreach (Transform obj in spawnedObjs)
+            obj.position -= delta;
+
+        foreach (Transform tile in spawnedGhostTiles)
+            tile.position -= delta;
+
+        // Anchor real spawn pos to last real tile
+        if (spawnedTiles.Count > 0)
         {
-            lastTime += Time.deltaTime;
-            timer += Time.fixedDeltaTime * 0.001f;
-            timeBTWspawns = minSpawnTime + spawnTimeCurve.Evaluate(timer) * (maxSpawnTime - minSpawnTime);
+            spawnPos = spawnedTiles[spawnedTiles.Count - 1].position;
+            spawnPos.y = startTile.position.y;
+        }
 
-            if (count <= 0)
-            {
-                count = UnityEngine.Random.Range(minLength_min, maxLength_max);
+        // Anchor mirror spawn pos to last mirror tile
+        if (spawnedObjs.Count > 0)
+        {
+            mirrorPos = spawnedObjs[spawnedObjs.Count - 1].position;
+            mirrorPos.y = startTile.position.y;
+        }
 
-                int rand = UnityEngine.Random.Range(0, 20);
-                if(rand < 4) count += 4;
-
-                if (side == -1) side = UnityEngine.Random.Range(0, 2);
-                else side = (side == 0) ? 1 : 0;
-
-                currentPath.Add(new PathSpawnData(side, count));
-            }
-
-            if (pCount <= 0 && previousPath.Count > 0 && pIndex < previousPath.Count)
-            {
-                pCount = previousPath[pIndex].count;
-                pSide = previousPath[pIndex].side;
-                pIndex++;
-            }
-
-            if (lastTime > timeBTWspawns && sceneManager.GameState == 1)
-            {
-                lastTime = 0.0;
-
-                if (pool != null)
-                {
-                    if (!GameManager.instance.isGameOver)
-                    {
-                        if (startCount <= 0)
-                        {
-                            spawnTile(0, spawnPos);
-
-                            spawnPos.z += tileSize / 1.41f;
-                            if (side == 0) spawnPos.x += tileSize / 1.41f;
-                            else if (side == 1) spawnPos.x -= tileSize / 1.41f;
-
-                            count--;
-
-                            coinChance = UnityEngine.Random.Range(0f, 1f);
-                            if (coinChance < 0.1f) //Make the -1f to 0.1f if you want to start spawning coins again
-                            {
-                                GameObject coin = pool.GetObject(1);
-                                coin.transform.position = new Vector3(spawnedTile.transform.position.x, 0.5f, spawnedTile.transform.position.z);
-                                coin.SetActive(true);
-                            }
-                        }
-                        else
-                        {
-                            spawnedTile = pool.GetObject(0);
-                            spawnedTile.transform.position = spawnPos;
-                            spawnedTile.SetActive(true);
-                            spawnedTile.transform.localScale = new Vector3(tileSize, 0.2f, tileSize);
-
-                            spawnPos.z += tileSize;
-                            startCount--;
-                        }
-                    }
-
-                    if (previousPath.Count > 0 && ghost)
-                    {
-                        spawnTile(2, pPosition);
-                        if (pSide != -1) pPosition.z += tileSize / 1.41f;
-                        else pPosition.z += tileSize;
-                        if (pSide == 0) pPosition.x += tileSize / 1.41f;
-                        else if (pSide == 1) pPosition.x -= tileSize / 1.41f;
-
-                        pCount--;
-                    }
-                }
-            }
+        if (spawnedGhostTiles.Count > 0)
+        {
+            pPosition = spawnedGhostTiles[spawnedGhostTiles.Count - 1].position;
+            pPosition.y = -1f;
+        }
+        else
+        {
+            pPosition -= delta;
         }
     }
 
-    void spawnTile(int poolIndex, Vector3 position)
+    // ─────────────────────────────────────────────
+    // Update
+    // ─────────────────────────────────────────────
+
+    void Update()
     {
+        if (sceneManager.GameState != 1) return;
+        timer += Time.deltaTime * 0.001f;
+
+        if (count <= 0)
+        {
+            count = UnityEngine.Random.Range(minLength_min, maxLength_max);
+            if (UnityEngine.Random.Range(0, 30) < 3) count += 2;
+
+            side = (side == 0) ? 1 : 0;
+            currentPath.Add(new PathSpawnData(side, count));
+        }
+
+        if (pCount <= 0 && previousPath.Count > 0 && pIndex < previousPath.Count)
+        {
+            pCount = previousPath[pIndex].count;
+            pSide = previousPath[pIndex].side;
+            pIndex++;
+        }
+
+        float dist =
+            Vector3.Distance(
+                player.transform.position,
+                spawnedTiles[spawnedTiles.Count - 1].position
+            );
+
+        if (dist > tilesAhead * tileSize) return;
+
+        if (pool == null || GameManager.instance.isGameOver) return;
+
+        // ── Real + mirror tiles ──
+        if (startCount > 0)
+        {
+            spawnStartTile();
+        }
+        else
+        {
+            spawnPos.z += tileSize / 1.41f;
+            if (side == 0) spawnPos.x += tileSize / 1.41f;
+            else if (side == 1) spawnPos.x -= tileSize / 1.41f;
+
+            mirrorPos.z += tileSize / 1.41f;
+            if (side == 0) mirrorPos.x -= tileSize / 1.41f;
+            else if (side == 1) mirrorPos.x += tileSize / 1.41f;
+
+            spawnTile(0);
+            count--;
+
+            // Coin on real path
+            coinChance = UnityEngine.Random.Range(0f, 1f);
+            if (coinChance < 0.0f)
+            {
+                GameObject coin = pool.GetObject(1);
+                coin.transform.position = new Vector3(spawnedTile.transform.position.x, 0.5f, spawnedTile.transform.position.z);
+                coin.SetActive(true);
+                // spawnedObjs.Add(coin.transform);
+            }
+        }
+
+        // ── Ghost tiles ──
+        if (ghost)
+        {
+            pPosition.z += (side != -1) ? tileSize / 1.41f : tileSize;
+            if (side == 0) pPosition.x -= tileSize / 1.41f;
+            else if (side == 1) pPosition.x += tileSize / 1.41f;
+
+            spawnGhostTile(pPosition);
+        }
+    }
+
+    // ─────────────────────────────────────────────
+    // Tile helpers
+    // ─────────────────────────────────────────────
+
+    void spawnStartTile()
+    {
+        spawnPos.z += tileSize;
+        spawnedTile = pool.GetObject(0);
+        spawnedTile.transform.position = spawnPos;
+        spawnedTile.SetActive(true);
+        spawnedTile.transform.localScale = new Vector3(tileSize, 0.2f, tileSize);
+        spawnedTiles.Add(spawnedTile.transform);
+        startCount--;
+
+        // Mirror start tile
+        mirrorPos.z += tileSize;
+        mirrorPos.y = startTile.position.y - 1f;
+        GameObject mirrorTile = pool.GetObject(0);
+        mirrorTile.transform.position = mirrorPos;
+        mirrorTile.SetActive(true);
+        mirrorTile.transform.localScale = new Vector3(tileSize, 0.2f, tileSize);
+        spawnedObjs.Add(mirrorTile.transform);
+    }
+
+    void spawnTile(int poolIndex)
+    {
+        // Real tile
+        spawnPos.y = startTile.position.y;
         spawnedTile = pool.GetObject(poolIndex);
-        spawnedTile.transform.position = position;
+        spawnedTile.transform.position = spawnPos;
         spawnedTile.SetActive(true);
         spawnedTile.transform.localScale = new Vector3(tileSize, 0.2f, tileSize);
         spawnedTile.transform.eulerAngles = new Vector3(0, -45, 0);
+        spawnedTiles.Add(spawnedTile.transform);
+
+        // Mirror tile — tracks its own position, x direction flipped
+        mirrorPos.y = startTile.position.y - 1f;
+        GameObject mirrorTile = pool.GetObject(poolIndex);
+        mirrorTile.transform.position = mirrorPos;
+        mirrorTile.SetActive(true);
+        mirrorTile.transform.localScale = new Vector3(tileSize, 0.2f, tileSize);
+        mirrorTile.transform.eulerAngles = new Vector3(0, -45, 0);
+        spawnedObjs.Add(mirrorTile.transform);
     }
+
+    void spawnGhostTile(Vector3 position)
+    {
+        position.y = -1f;
+        GameObject ghostTile = pool.GetObject(2);
+        ghostTile.transform.position = position;
+        ghostTile.SetActive(true);
+        ghostTile.transform.localScale = new Vector3(tileSize, 0.2f, tileSize);
+        ghostTile.transform.eulerAngles = new Vector3(0, -45, 0);
+        spawnedGhostTiles.Add(ghostTile.transform);
+    }
+
+    // ─────────────────────────────────────────────
+    // Save / Load
+    // ─────────────────────────────────────────────
 
     public void LoadData(object data)
     {
         if (data is PathData p)
-        {
             previousPath = p._path;
-        }
     }
 
     public object SaveData()
     {
-        return new PathData
-        {
-            _path = currentPath
-        };
+        return new PathData { _path = currentPath };
     }
 
     class PathData
@@ -183,7 +262,6 @@ public class pathSpawner : MonoBehaviour, ISaveFuncs
         public List<PathSpawnData> _path;
     }
 }
-
 
 [Serializable]
 public class PathSpawnData

@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Events;
 
 [RequireComponent(typeof(CharacterController))]
 public class player : MonoBehaviour, ISaveFuncs
@@ -19,12 +20,13 @@ public class player : MonoBehaviour, ISaveFuncs
     [SerializeField, Range(0, 1f)] float speedIncrement;
     [SerializeField, Range(0, 100f)] float gravity, rotationSpeed;
 
+    public UnityEvent<Vector3> moving;
+
     int side = 0, temp_side = 0;
     float _speed = 0;
-    Vector3 velocity, move, cameraOffset;
+    Vector3 velocity, move, cameraOffset, playerMove;
     Quaternion rotation;
-    [SerializeField] bool localMultiplayerMode;
-    [SerializeField] bool RightOrLeft;
+    [SerializeField] bool localMultiplayerMode, RightOrLeft;
 
     void Awake()
     {
@@ -129,8 +131,11 @@ public class player : MonoBehaviour, ISaveFuncs
                 _speed += speedIncrement * Time.deltaTime;
                 _speed = Mathf.Clamp(_speed, minSpeed, maxSpeed);
 
-                move = new Vector3(side, velocity.y, 1f).normalized;
-                cc.Move(move * Time.deltaTime * _speed);
+                move = new Vector3(side, 0, 1f).normalized;
+                moving?.Invoke(move * _speed * Time.deltaTime);
+
+                playerMove = new Vector3(0f, velocity.y, 0f).normalized;
+                cc.Move(playerMove * Time.deltaTime * _speed);
 
                 rotation = Quaternion.Euler(0, side * 45f, 0);
                 transform.rotation = Quaternion.Lerp(transform.rotation, rotation, Time.deltaTime * rotationSpeed);
