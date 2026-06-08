@@ -39,20 +39,20 @@ public class PlayerGhost : MonoBehaviour
 
     void Update()
     {
-        if (player.instance == null) return;
+        if (Player.instance == null) return;
 
         if (sceneManager.GameState == 1)
         {
             if (tileFaller != null) tileFaller.SetActive(true);
             if (moveParticles != null) moveParticles.SetActive(true);
 
-            if (!cc.isGrounded) velocity.y -= player.instance.getGravity() * Time.deltaTime;
+            if (!cc.isGrounded) velocity.y -= Player.instance.getGravity() * Time.deltaTime;
             else velocity.y = 0;
 
             transform.rotation = Quaternion.Lerp(transform.rotation, Quaternion.Euler(0, side * 45f, 0), Time.deltaTime * .2f);
 
             Vector3 move = new Vector3(side, velocity.y, 1f).normalized;
-            Vector3 displacement = move * Time.deltaTime * player.instance.getSpeed();
+            Vector3 displacement = move * Time.deltaTime * Player.instance.getSpeed();
 
             cc.Move(displacement);
 

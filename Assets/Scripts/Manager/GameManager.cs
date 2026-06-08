@@ -7,7 +7,7 @@ public class GameManager : MonoBehaviour
 {
     public static GameManager instance;
     public static bool isPlayConnected = false;
-    player Player;
+    Player Player;
     sceneManager sceneManager;
 
     public bool isGameOver = false;
@@ -27,7 +27,7 @@ public class GameManager : MonoBehaviour
 
     void Start()
     {
-        Player = player.instance;
+        Player = Player.instance;
         sceneManager = GetComponent<sceneManager>();
 
         if (coinsText != null) coinsText.text = 0000.ToString("D2");
@@ -62,7 +62,7 @@ public class GameManager : MonoBehaviour
 
         PointsManager.instance.coinAddedEvent += updateScoreUI;
         PointsManager.instance.scoreAddedEvent += updateScore;
-        player.instance.playerDied += OnPlayerDied;
+        Player.instance.playerDied += OnPlayerDied;
     }
 
     private void OnDisable()

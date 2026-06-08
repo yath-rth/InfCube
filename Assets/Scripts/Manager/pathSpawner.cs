@@ -8,7 +8,7 @@ public class pathSpawner : MonoBehaviour, ISaveFuncs
     public static pathSpawner instance;
 
     ObjectPooler pool;
-    [SerializeField] player player;
+    [SerializeField] Player player;
     [Range(0, 2f)] public float tileSize;
     [SerializeField, Range(0, 20)] int minLength_min, maxLength_max;
     [SerializeField, Range(0f, 10f)] float tilesAhead;
@@ -33,6 +33,9 @@ public class pathSpawner : MonoBehaviour, ISaveFuncs
     string ISaveFuncs.id => "PathSpawner";
     public static event Action<List<PathSpawnData>> pathInfoEvent;
 
+    public int seed;
+    SeededRandom random;
+
     // ─────────────────────────────────────────────
     // Lifecycle
     // ─────────────────────────────────────────────
@@ -46,7 +49,7 @@ public class pathSpawner : MonoBehaviour, ISaveFuncs
     void Start()
     {
         pool = ObjectPooler.instance;
-        if (player == null) player = player.instance;
+        if (player == null) player = Player.instance;
 
         spawnPos = startTile != null ? startTile.position : Vector3.zero;
         mirrorPos = spawnPos;
@@ -54,13 +57,6 @@ public class pathSpawner : MonoBehaviour, ISaveFuncs
         spawnStartTile();
 
         currentPath.Add(new PathSpawnData(-1, startCount));
-
-        side = UnityEngine.Random.Range(0, 2);
-        count = UnityEngine.Random.Range(minLength_min, maxLength_max);
-        currentPath.Add(new PathSpawnData(side, count));
-
-        if (player != null) player.changeDir(side);
-
         timer = 0;
 
         if (SaveManager.Instance != null)
@@ -115,6 +111,17 @@ public class pathSpawner : MonoBehaviour, ISaveFuncs
     // Update
     // ─────────────────────────────────────────────
 
+    public void Initialize(int seed)
+    {
+        random = new SeededRandom(seed);
+        side = random.Next(0, 2);
+        count = random.Next(minLength_min, maxLength_max);
+        currentPath.Add(new PathSpawnData(side, count));
+
+        if (player != null) player.changeDir(side);
+
+    }
+
     void Update()
     {
         if (sceneManager.GameState != 1) return;
@@ -122,8 +129,8 @@ public class pathSpawner : MonoBehaviour, ISaveFuncs
 
         if (count <= 0)
         {
-            count = UnityEngine.Random.Range(minLength_min, maxLength_max);
-            if (UnityEngine.Random.Range(0, 30) < 3) count += 2;
+            count = random.Next(minLength_min, maxLength_max);
+            if (random.Next(0, 30) < 3) count += 2;
 
             side = (side == 0) ? 1 : 0;
             currentPath.Add(new PathSpawnData(side, count));
@@ -165,7 +172,7 @@ public class pathSpawner : MonoBehaviour, ISaveFuncs
             count--;
 
             // Coin on real path
-            coinChance = UnityEngine.Random.Range(0f, 1f);
+            coinChance = random.Next(0f, 1f);
             if (coinChance < 0.0f)
             {
                 GameObject coin = pool.GetObject(1);

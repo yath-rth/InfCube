@@ -10,7 +10,7 @@ public class DecreaseSpeed : ItemEffectBase
         if (obj is UpgradeItem item)
         {
             // Assuming the player has a method to decrease speed
-            player player = GameObject.FindWithTag("Player").GetComponent<player>();
+            Player player = GameObject.FindWithTag("Player").GetComponent<Player>();
             if (player != null)
             {
                 player.DecreaseSpeed(speedDecreaseAmount);

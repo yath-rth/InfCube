@@ -849,11 +849,13 @@ PlayerSettings:
     EmbeddedLinux: DOTWEEN
     GameCoreScarlett: DOTWEEN
     GameCoreXboxOne: DOTWEEN
+    Kepler: DOTWEEN
     LinuxHeadlessSimulation: DOTWEEN
     Nintendo Switch: DOTWEEN
     PS4: DOTWEEN
     PS5: DOTWEEN
     QNX: DOTWEEN
+    ReservedCFE: DOTWEEN
     Stadia: DOTWEEN
     Standalone: DOTWEEN
     VisionOS: DOTWEEN

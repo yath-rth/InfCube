@@ -5,13 +5,12 @@ using UnityEngine;
 using UnityEngine.Events;
 
 [RequireComponent(typeof(CharacterController))]
-public class player : MonoBehaviour, ISaveFuncs
+public class Player : MonoBehaviour, ISaveFuncs
 {
-    public static player instance;
+    public static Player instance;
     public Action playerDied;
     string ISaveFuncs.id => "Player";
     GameObject tileFaller, Scorer;
-    Controls controls;
     CharacterController cc;
     GameManager gameManager;
 
@@ -22,7 +21,7 @@ public class player : MonoBehaviour, ISaveFuncs
 
     public UnityEvent<Vector3> moving;
 
-    int side = 0, temp_side = 0;
+    public int side = 0, temp_side = 0;
     float _speed = 0;
     Vector3 velocity, move, cameraOffset, playerMove;
     Quaternion rotation;
@@ -43,22 +42,6 @@ public class player : MonoBehaviour, ISaveFuncs
         if (Scorer != null) Scorer.SetActive(false);
         if (moveParticles != null) moveParticles.gameObject.SetActive(false);
 
-        controls = new Controls();
-
-        if (!localMultiplayerMode) controls.movement.turn_singlePlayer.performed += ctx => turn();
-        else
-        {
-            if (!RightOrLeft) controls.movement.turn_leftPlayer.performed += ctx => turn();
-            else controls.movement.turn_righPlayer.performed += ctx => turn();
-        }
-
-        controls.movement.escape.performed += ctx => gameManager.close();
-        controls.movement.mainMenu.performed += ctx => gameManager.mainMenu();
-        controls.movement.space.performed += ctx => gameManager.restart();
-        controls.movement.space.performed += ctx => sceneManager.instance.Game();
-        controls.movement.leaderboard.performed += ctx => gameManager.showLeaderboard();
-        controls.movement.shop.performed += ctx => gameManager.shop();
-
         if (cam != null) cameraOffset = cam.position - transform.position;
 
         if (bgParticles != null)
@@ -69,15 +52,6 @@ public class player : MonoBehaviour, ISaveFuncs
         }
 
         _speed = minSpeed;
-    }
-
-    void OnEnable()
-    {
-        controls.Enable();
-    }
-    void OnDisable()
-    {
-        controls.Disable();
     }
 
     void ISaveFuncs.LoadData(object data)
@@ -168,7 +142,7 @@ public class player : MonoBehaviour, ISaveFuncs
         _speed = Mathf.Clamp(_speed, minSpeed, maxSpeed);
     }
 
-    void turn()
+    public void turn()
     {
         if (sceneManager.GameState == 1)
         {

@@ -1,0 +1,9 @@
+fileFormatVersion: 2
+guid: 1a581476d8a8d7f46b5a4617005d6b77
+AssetOrigin:
+  serializedVersion: 1
+  productId: 225473
+  packageName: 'Netly: TCP, UDP, RUDP, HTTP, WebSocket'
+  packageVersion: 4.0.0
+  assetPath: Assets/Plugins/Netly/Netly.dll
+  uploadId: 752609
