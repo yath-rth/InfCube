@@ -5,13 +5,18 @@ using System.Collections.Generic;
 public class UpdatePayload
 {
     public List<PlayerState> players;
-    public List<TileData> tiles;
+    public float speed;
 
     public UpdatePayload() { }
 
-    public UpdatePayload(List<PlayerState> players, List<TileData> tiles)
+    public UpdatePayload(List<PlayerState> players, float speed)
     {
         this.players = players;
-        this.tiles = tiles;
+        this.speed = speed;
+    }
+
+    public override string ToString()
+    {
+        return $"UpdatePayload{{ players: {players}, speed: {speed} }}";
     }
 }

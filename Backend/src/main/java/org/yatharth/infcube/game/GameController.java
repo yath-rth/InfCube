@@ -2,67 +2,172 @@ package org.yatharth.infcube.game;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
-import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
-import org.yatharth.infcube.game.logic.PathGenerator;
-import org.yatharth.infcube.game.logic.PlayerManager;
-import org.yatharth.infcube.model.ClientMessage;
-import org.yatharth.infcube.model.Player;
-import org.yatharth.infcube.model.ServerMessage;
-import org.yatharth.infcube.model.Vector3;
-import org.yatharth.infcube.model.payloads.InputPayload;
-import org.yatharth.infcube.model.payloads.UpdatePayload;
-import org.yatharth.infcube.util.WebSocketSessionUtil;
+import org.yatharth.infcube.model.*;
+import org.yatharth.infcube.model.payloads.*;
+import org.yatharth.infcube.util.MatchUtil;
+import org.yatharth.infcube.util.WebSocketUtil;
 import tools.jackson.databind.ObjectMapper;
 
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 @Component
 @RequiredArgsConstructor
 public class GameController {
 
     private final ObjectMapper objectMapper;
-    private final PlayerManager playerManager;
+    private final MatchService matchService;
     private final PathGenerator pathGenerator;
+    private final SessionRegistry sessionRegistry;
+    private final MatchStore matchStore;
 
     public void handleJoin(WebSocketSession session, ClientMessage message) {
-        playerManager.addPlayer(session);
-        System.out.println("Player joined: " + session.getId());
-    }
+        Match match = matchService.queuePlayer(session);
 
-    public void handleInput(WebSocketSession session, ClientMessage message) {
-        InputPayload payload = objectMapper.convertValue(message.payload, InputPayload.class);
-
-        Player player = playerManager.getPlayer(session.getId());
-        if (player == null) return;
-        player.direction = new Vector3(payload.side, 0f, 1f);
-    }
-
-    public void updateAll() throws Exception {
-        if(playerManager.getPlayers().size() < 2) return;
-
-        playerManager.movePlayers();
-        ServerMessage message = new ServerMessage(
-                "update", GameConstants.TESTING_ROOM_ID, System.currentTimeMillis(),
-                new UpdatePayload(
-                        playerManager.getPlayers(), null
-                )
-        );
-        String json = objectMapper.writeValueAsString(message);
-        if(playerManager.getPlayers().isEmpty()) return;
-        if(playerManager.getSessions().isEmpty()) return;
-
-        for (WebSocketSession session : playerManager.getSessions()) {
-            if (session != null && session.isOpen())
-                WebSocketSessionUtil.safeSend(session, json);
+        if (match != null) {
+            sendWelcome(match);
         }
     }
 
-    public void handleDisconnect(WebSocketSession session) throws Exception {
-        playerManager.removePlayer(session);
-        System.out.println("Player removed: " + session.getId());
+    private void sendWelcome(Match match) {
+        Player p1 = match.getPlayer1();
+        Player p2 = match.getPlayer2();
+
+        WebSocketUtil.safeSend(
+                sessionRegistry.get(p1.getSessionId()),
+                objectMapper.writeValueAsString(BuildPayload.welcome(match, p1, p2))
+        );
+        WebSocketUtil.safeSend(
+                sessionRegistry.get(p2.getSessionId()),
+                objectMapper.writeValueAsString(BuildPayload.welcome(match, p2, p2))
+        );
     }
+
+    public void handleNewMap(WebSocketSession session) {
+        String matchId = sessionRegistry.getMatchId(session.getId());
+        if (matchId == null) return;
+        Match match = matchStore.getMatch(matchId);
+        if (match == null) return;
+        List<WebSocketSession> sessions = sessionRegistry.getSessions(MatchUtil.getAllIds(match));
+
+        List<PathInfo> map = pathGenerator.generatePath(match.getSeed());
+        match.path.addAll(map);
+        WebSocketUtil.sendAll(
+                sessions,
+                objectMapper.writeValueAsString(new ServerMessage(
+                        "map_update",
+                        GameConstants.TESTING_ROOM_ID,
+                        System.currentTimeMillis(),
+                        new NewMapPayload(map)
+                ))
+        );
+    }
+
+    public void handlePosition(WebSocketSession session, ClientMessage decodedMsg) {
+        String matchId = sessionRegistry.getMatchId(session.getId());
+        if (matchId == null) return;
+        Match match = matchStore.getMatch(matchId);
+        if (match == null) return;
+
+        PositionPayload payload = objectMapper.convertValue(
+                decodedMsg.payload,
+                PositionPayload.class
+        );
+        Vector3 position = new Vector3(payload.x, payload.y, payload.z);
+
+        if (position.y < -1f) {
+            System.out.println("Player " + session.getId() + " fell out of the map.");
+            List<WebSocketSession> sessions = sessionRegistry.getSessions(MatchUtil.getAllIds(match));
+            WebSocketUtil.sendAll(
+                    sessions,
+                    objectMapper.writeValueAsString(
+                            new ServerMessage(
+                                    "game_over",
+                                    GameConstants.TESTING_ROOM_ID,
+                                    System.currentTimeMillis(),
+                                    new GameOverPayload(session.getId())
+                            )
+                    )
+            );
+
+            matchService.stopMatch(match.getMatchId());
+        }
+    }
+
+    public void handleInput(WebSocketSession session, ClientMessage message) {
+        String matchId = sessionRegistry.getMatchId(session.getId());
+        if (matchId == null) return;
+        Match match = matchStore.getMatch(matchId);
+        if (match == null) return;
+
+        InputPayload payload = objectMapper.convertValue(message.payload, InputPayload.class);
+
+        Player player = MatchUtil.getPlayerFromMatch(match, session.getId());
+        if (player == null) return;
+        player.direction = new Vector3(payload.side, 0f, 1f);
+        player.position = new Vector3(payload.posX, 0f, payload.posZ);
+
+        WebSocketSession opponentSession =
+                sessionRegistry.get(MatchUtil.getOpponentFromMatch(match, session.getId())
+                        .getSessionId());
+        WebSocketUtil.safeSend(
+                opponentSession,
+                objectMapper.writeValueAsString(new ServerMessage(
+                        "player_move",
+                        GameConstants.TESTING_ROOM_ID,
+                        System.currentTimeMillis(),
+                        message.payload
+                ))
+        );
+    }
+
+    public void updateMatch(String matchId) {
+        if (matchId == null) return;
+        Match match = matchStore.getMatch(matchId);
+        if (match == null) return;
+
+        match.setSpeed(match.getSpeed() + GameConstants.ACCELERATION);
+        if (match.getSpeed() > GameConstants.MAX_SPEED) match.setSpeed(GameConstants.MAX_SPEED);
+        List<Player> players = MatchUtil.getAllPlayers(match);
+
+        ServerMessage message = new ServerMessage(
+                "update",
+                GameConstants.TESTING_ROOM_ID,
+                System.currentTimeMillis(),
+                new UpdatePayload(players, match.getSpeed())
+        );
+        String json = objectMapper.writeValueAsString(message);
+        if (players.isEmpty()) return;
+        List<WebSocketSession> sessions = sessionRegistry.getSessions(MatchUtil.getAllIds(match));
+        if (sessions.isEmpty()) return;
+
+        WebSocketUtil.sendAll(sessions, json);
+    }
+
+    public void handleDisconnect(WebSocketSession session) {
+        String matchId = sessionRegistry.getMatchId(session.getId());
+        if (matchId == null) {
+            matchService.removePlayer(session);
+            return;
+        }
+
+        Match match = matchStore.getMatch(matchId);
+        if (match == null) return;
+
+        Player opponent = MatchUtil.getOpponentFromMatch(match, session.getId());
+        if (opponent != null) {
+            WebSocketUtil.safeSend(
+                    sessionRegistry.get(opponent.getSessionId()),
+                    objectMapper.writeValueAsString(new ServerMessage(
+                            "opponent_disconnected", matchId,
+                            System.currentTimeMillis(),
+                            null
+                    ))
+            );
+        }
+
+        matchService.stopMatch(matchId);
+    }
+
 
 }

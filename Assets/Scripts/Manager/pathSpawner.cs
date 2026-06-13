@@ -10,31 +10,23 @@ public class pathSpawner : MonoBehaviour, ISaveFuncs
     ObjectPooler pool;
     [SerializeField] Player player;
     [Range(0, 2f)] public float tileSize;
-    [SerializeField, Range(0, 20)] int minLength_min, maxLength_max;
     [SerializeField, Range(0f, 10f)] float tilesAhead;
     [SerializeField] AnimationCurve spawnTimeCurve;
     [SerializeField] Transform startTile;
     [SerializeField] bool ghost;
-    float timer = 0f;
-    int count, side = -1, startCount = 10;
+    int count, side = -1, startCount = 10, startMirrorCount = 10, tileCount = 0, mirrorCount, mirrorSide = -1;
     double coinChance = 0f;
     GameObject spawnedTile;
     Vector3 spawnPos, mirrorPos;
-
+    bool sent = false;
+    Queue<PathInfo> path, mirroredPath;
     List<Transform> spawnedTiles = new List<Transform>();
-    List<Transform> spawnedObjs = new List<Transform>();
-    List<Transform> spawnedGhostTiles = new List<Transform>();
+    List<Transform> spawnedMirrorTiles = new List<Transform>();
     List<PathSpawnData> currentPath = new List<PathSpawnData>();
     List<PathSpawnData> previousPath = new List<PathSpawnData>();
-
-    int pSide = 0, pCount = 0, pIndex = 0;
-    Vector3 pPosition = Vector3.zero;
-
+    Transform remotePlayer;
     string ISaveFuncs.id => "PathSpawner";
     public static event Action<List<PathSpawnData>> pathInfoEvent;
-
-    public int seed;
-    SeededRandom random;
 
     // ─────────────────────────────────────────────
     // Lifecycle
@@ -53,11 +45,8 @@ public class pathSpawner : MonoBehaviour, ISaveFuncs
 
         spawnPos = startTile != null ? startTile.position : Vector3.zero;
         mirrorPos = spawnPos;
-        pPosition = spawnPos;
-        spawnStartTile();
 
         currentPath.Add(new PathSpawnData(-1, startCount));
-        timer = 0;
 
         if (SaveManager.Instance != null)
         {
@@ -68,79 +57,64 @@ public class pathSpawner : MonoBehaviour, ISaveFuncs
     }
 
     // ─────────────────────────────────────────────
-    // World movement (called from player.cs)
-    // ─────────────────────────────────────────────
-
-    public void move(Vector3 delta)
-    {
-        foreach (Transform tile in spawnedTiles)
-            tile.position -= delta;
-
-        foreach (Transform obj in spawnedObjs)
-            obj.position -= delta;
-
-        foreach (Transform tile in spawnedGhostTiles)
-            tile.position -= delta;
-
-        // Anchor real spawn pos to last real tile
-        if (spawnedTiles.Count > 0)
-        {
-            spawnPos = spawnedTiles[spawnedTiles.Count - 1].position;
-            spawnPos.y = startTile.position.y;
-        }
-
-        // Anchor mirror spawn pos to last mirror tile
-        if (spawnedObjs.Count > 0)
-        {
-            mirrorPos = spawnedObjs[spawnedObjs.Count - 1].position;
-            mirrorPos.y = startTile.position.y;
-        }
-
-        if (spawnedGhostTiles.Count > 0)
-        {
-            pPosition = spawnedGhostTiles[spawnedGhostTiles.Count - 1].position;
-            pPosition.y = -1f;
-        }
-        else
-        {
-            pPosition -= delta;
-        }
-    }
-
-    // ─────────────────────────────────────────────
     // Update
     // ─────────────────────────────────────────────
 
-    public void Initialize(int seed)
+    public void Initialize(Queue<PathInfo> path, Transform remote)
     {
-        random = new SeededRandom(seed);
-        side = random.Next(0, 2);
-        count = random.Next(minLength_min, maxLength_max);
+        spawnStartTile();
+        spawnMirrorStartTiles();
+
+        remotePlayer = remote;
+        this.path = new Queue<PathInfo>(path);
+        mirroredPath = new Queue<PathInfo>(path);
+
+        PathInfo info = this.path.Dequeue();
+        side = info.side;
+        count = info.count;
+
+        info = mirroredPath.Dequeue();
+        mirrorSide = info.side;
+        mirrorCount = info.count;
         currentPath.Add(new PathSpawnData(side, count));
 
         if (player != null) player.changeDir(side);
+    }
 
+    public void UpdatePath(Queue<PathInfo> extension)
+    {
+        sent = false;
+        foreach (PathInfo info in extension)
+        {
+            path.Enqueue(info);
+            mirroredPath.Enqueue(info);
+        }
     }
 
     void Update()
     {
         if (sceneManager.GameState != 1) return;
-        timer += Time.deltaTime * 0.001f;
+        if (pool == null || GameManager.instance.isGameOver) return;
+
+        if (path.Count <= 50 && !sent)
+        {
+            ConnectionManager.instance.SendMapOver();
+            sent = true;
+        }
 
         if (count <= 0)
         {
-            count = random.Next(minLength_min, maxLength_max);
-            if (random.Next(0, 30) < 3) count += 2;
-
-            side = (side == 0) ? 1 : 0;
+            PathInfo info = path.Dequeue();
+            side = info.side;
+            count = info.count;
             currentPath.Add(new PathSpawnData(side, count));
         }
 
-        if (pCount <= 0 && previousPath.Count > 0 && pIndex < previousPath.Count)
+        if (mirrorCount <= 0)
         {
-            pCount = previousPath[pIndex].count;
-            pSide = previousPath[pIndex].side;
-            pIndex++;
+            PathInfo info = mirroredPath.Dequeue();
+            mirrorSide = info.side;
+            mirrorCount = info.count;
         }
 
         float dist =
@@ -149,48 +123,61 @@ public class pathSpawner : MonoBehaviour, ISaveFuncs
                 spawnedTiles[spawnedTiles.Count - 1].position
             );
 
-        if (dist > tilesAhead * tileSize) return;
-
-        if (pool == null || GameManager.instance.isGameOver) return;
-
-        // ── Real + mirror tiles ──
-        if (startCount > 0)
+        if (dist < tilesAhead * tileSize)
         {
-            spawnStartTile();
-        }
-        else
-        {
-            spawnPos.z += tileSize / 1.41f;
-            if (side == 0) spawnPos.x += tileSize / 1.41f;
-            else if (side == 1) spawnPos.x -= tileSize / 1.41f;
-
-            mirrorPos.z += tileSize / 1.41f;
-            if (side == 0) mirrorPos.x -= tileSize / 1.41f;
-            else if (side == 1) mirrorPos.x += tileSize / 1.41f;
-
-            spawnTile(0);
-            count--;
-
-            // Coin on real path
-            coinChance = random.Next(0f, 1f);
-            if (coinChance < 0.0f)
+            if (startCount > 0)
             {
-                GameObject coin = pool.GetObject(1);
-                coin.transform.position = new Vector3(spawnedTile.transform.position.x, 0.5f, spawnedTile.transform.position.z);
-                coin.SetActive(true);
-                // spawnedObjs.Add(coin.transform);
+                spawnStartTile();
+            }
+            else
+            {
+                spawnPos.z += tileSize / 1.41f;
+                if (side == 0) spawnPos.x += tileSize / 1.41f;
+                else if (side == 1) spawnPos.x -= tileSize / 1.41f;
+                spawnTile(0);
+                count--;
+
+                // Coin on real path
+                // coinChance = random.Next(0f, 1f);
+                if (coinChance < 0.0f)
+                {
+                    GameObject coin = pool.GetObject(1);
+                    coin.transform.position = new Vector3(spawnedTile.transform.position.x, 0.5f, spawnedTile.transform.position.z);
+                    coin.SetActive(true);
+                    // spawnedObjs.Add(coin.transform);
+                }
             }
         }
 
-        // ── Ghost tiles ──
-        if (ghost)
-        {
-            pPosition.z += (side != -1) ? tileSize / 1.41f : tileSize;
-            if (side == 0) pPosition.x -= tileSize / 1.41f;
-            else if (side == 1) pPosition.x += tileSize / 1.41f;
+        if (remotePlayer == null) return;
 
-            spawnGhostTile(pPosition);
+        float remoteDist =
+            Vector3.Distance(
+                remotePlayer.position,
+                spawnedMirrorTiles[spawnedMirrorTiles.Count - 1].position
+            );
+
+        if (remoteDist < tilesAhead * tileSize)
+        {
+            if (startMirrorCount > 0)
+            {
+                spawnMirrorStartTiles();
+            }
+            else
+            {
+                mirrorPos.z += tileSize / 1.41f;
+                if (mirrorSide == 0) mirrorPos.x -= tileSize / 1.41f;
+                else if (mirrorSide == 1) mirrorPos.x += tileSize / 1.41f;
+
+                spawnMirrorTile(0);
+                mirrorCount--;
+            }
         }
+    }
+
+    public int getCurrentTile()
+    {
+        return tileCount;
     }
 
     // ─────────────────────────────────────────────
@@ -206,15 +193,19 @@ public class pathSpawner : MonoBehaviour, ISaveFuncs
         spawnedTile.transform.localScale = new Vector3(tileSize, 0.2f, tileSize);
         spawnedTiles.Add(spawnedTile.transform);
         startCount--;
+        tileCount++;
+    }
 
-        // Mirror start tile
+    void spawnMirrorStartTiles()
+    {
         mirrorPos.z += tileSize;
-        mirrorPos.y = startTile.position.y - 1f;
+        mirrorPos.y = -1f;
         GameObject mirrorTile = pool.GetObject(0);
         mirrorTile.transform.position = mirrorPos;
         mirrorTile.SetActive(true);
         mirrorTile.transform.localScale = new Vector3(tileSize, 0.2f, tileSize);
-        spawnedObjs.Add(mirrorTile.transform);
+        spawnedMirrorTiles.Add(mirrorTile.transform);
+        startMirrorCount--;
     }
 
     void spawnTile(int poolIndex)
@@ -227,26 +218,18 @@ public class pathSpawner : MonoBehaviour, ISaveFuncs
         spawnedTile.transform.localScale = new Vector3(tileSize, 0.2f, tileSize);
         spawnedTile.transform.eulerAngles = new Vector3(0, -45, 0);
         spawnedTiles.Add(spawnedTile.transform);
+        tileCount++;
+    }
 
-        // Mirror tile — tracks its own position, x direction flipped
-        mirrorPos.y = startTile.position.y - 1f;
+    void spawnMirrorTile(int poolIndex)
+    {
+        mirrorPos.y = -1f;
         GameObject mirrorTile = pool.GetObject(poolIndex);
         mirrorTile.transform.position = mirrorPos;
         mirrorTile.SetActive(true);
         mirrorTile.transform.localScale = new Vector3(tileSize, 0.2f, tileSize);
         mirrorTile.transform.eulerAngles = new Vector3(0, -45, 0);
-        spawnedObjs.Add(mirrorTile.transform);
-    }
-
-    void spawnGhostTile(Vector3 position)
-    {
-        position.y = -1f;
-        GameObject ghostTile = pool.GetObject(2);
-        ghostTile.transform.position = position;
-        ghostTile.SetActive(true);
-        ghostTile.transform.localScale = new Vector3(tileSize, 0.2f, tileSize);
-        ghostTile.transform.eulerAngles = new Vector3(0, -45, 0);
-        spawnedGhostTiles.Add(ghostTile.transform);
+        spawnedMirrorTiles.Add(mirrorTile.transform);
     }
 
     // ─────────────────────────────────────────────

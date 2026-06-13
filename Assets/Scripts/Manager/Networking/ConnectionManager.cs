@@ -13,7 +13,7 @@ public class ConnectionManager : MonoBehaviour
     public string url, playerId;
     public string roomId;
     [SerializeField] GameObject playerPrefab;
-    List<GameObject> remotePlayers = new List<GameObject>();
+    List<NetworkPlayer> remotePlayers = new List<NetworkPlayer>();
     bool hasPlayerId = false, hasJoined = false;
 
     [SerializeField] TMP_Text roomIdText;
@@ -23,32 +23,6 @@ public class ConnectionManager : MonoBehaviour
         Application.targetFrameRate = 165;
         if (instance != null) Destroy(this);
         instance = this;
-    }
-
-    public void UpdateRoomId(string _roomId)
-    {
-        roomId = _roomId;
-    }
-
-    public async void JoinRoom()
-    {
-        if (roomId.Length != 6) return;
-        if (ws.State == WebSocketState.Open)
-        {
-            var msg = new ClientMessage(MessageTypes.JOIN, roomId, playerId, new PlayerJoinPayload());
-            SendMessage(msg);
-            hasJoined = true;
-        }
-    }
-
-    public async void CreateRoom()
-    {
-        if (ws.State == WebSocketState.Open)
-        {
-            var msg = new ClientMessage(MessageTypes.JOIN, "CreateRoom", playerId, new PlayerJoinPayload());
-            SendMessage(msg);
-            hasJoined = true;
-        }
     }
 
     public async void Disconnect()
@@ -105,7 +79,7 @@ public class ConnectionManager : MonoBehaviour
             return;
         }
 
-        Debug.Log("Sending message: " + msg);
+        // Debug.Log("Sending message: " + msg);
         var json = JsonConvert.SerializeObject(msg, Formatting.None, new JsonSerializerSettings
         {
             ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
@@ -130,10 +104,29 @@ public class ConnectionManager : MonoBehaviour
     public async void SendMoveInput(int side)
     {
         if (!hasPlayerId) return;
-        if (!hasJoined) return;
         if (ws.State == WebSocketState.Open)
         {
-            var msg = new ClientMessage(MessageTypes.INPUT, roomId, playerId, new InputPayload(side));
+            ClientMessage msg = new ClientMessage(MessageTypes.INPUT, roomId, playerId, new InputPayload(side, pathSpawner.instance.getCurrentTile(), Player.instance.transform.position));
+            SendMessage(msg);
+        }
+    }
+
+    public async void SendMapOver()
+    {
+        if (!hasPlayerId) return;
+        if (ws.State == WebSocketState.Open)
+        {
+            ClientMessage msg = new ClientMessage(MessageTypes.MAP_OVER, roomId, playerId, null);
+            SendMessage(msg);
+        }
+    }
+
+    public async void SendPosition(PositionPayload payload)
+    {
+        if (!hasPlayerId) return;
+        if (ws.State == WebSocketState.Open)
+        {
+            ClientMessage msg = new ClientMessage(MessageTypes.POSITION, roomId, playerId, payload);
             SendMessage(msg);
         }
     }
@@ -147,33 +140,41 @@ public class ConnectionManager : MonoBehaviour
     {
         playerId = payload.playerId;
         hasPlayerId = true;
+        Player.instance.SetSpeed(payload.startSpeed);
+        GameObject go = null;
 
         if (!hasJoined && playerPrefab != null)
         {
-            var go = Instantiate(playerPrefab, Vec3(payload.spawnX, payload.spawnY, payload.spawnZ), Quaternion.identity);
-            remotePlayers.Add(go);
+            go = Instantiate(playerPrefab, Player.instance.transform.position + Vector3.down + Vector3.forward, Quaternion.identity);
+            remotePlayers.Add(go.GetComponent<NetworkPlayer>());
+            go.GetComponent<NetworkPlayer>().SetSpeed(payload.startSpeed);
+            Debug.Log("Made player: " + go.name);
         }
 
-        pathSpawner.instance.Initialize(payload.seed);
+        pathSpawner.instance.Initialize(payload.path, go.transform);
         MatchMaking.instance.OpponentFound();
     }
 
     void HandleUpdate(UpdatePayload payload)
     {
-        for (int i = 0; i < payload.players.Count; i++)
+        Player.instance.SetSpeed(payload.speed);
+        // Debug.Log("Update payload received: " + payload.ToString());
+
+        for (int i = 0; i < payload.players.Count - 1; i++)
         {
             var p = payload.players[i];
             var pos = Vec3(p.posX, p.posY, p.posZ);
 
             if (i < remotePlayers.Count)
             {
-                remotePlayers[i].GetComponent<NetworkPlayer>().movePlayer(pos);
+                remotePlayers[i].SetSpeed(payload.speed);
             }
             else if (playerPrefab != null)
             {
                 GameObject go = Instantiate(playerPrefab, pos, Quaternion.identity);
-                remotePlayers.Add(go);
+                remotePlayers.Add(go.GetComponent<NetworkPlayer>());
                 Debug.Log("Couldn't find player so created a new one");
+                Debug.Log("Made player: " + go.name);
             }
         }
 
@@ -183,6 +184,26 @@ public class ConnectionManager : MonoBehaviour
             remotePlayers.RemoveAt(remotePlayers.Count - 1);
             Destroy(extra);
         }
+    }
+
+    public Queue<InputPayload> pendingTurns = new Queue<InputPayload>();
+
+    void HandlePlayerMove(InputPayload move)
+    {
+        pendingTurns.Enqueue(move);
+    }
+
+    void HandleGameOver(GameOverPayload payload)
+    {
+        GameManager.instance.OnPlayerDied();
+    }
+
+    public void ProcessTurn(NetworkPlayer networkPlayer)
+    {
+        if (pendingTurns.Count == 0) return;
+
+        InputPayload turn = pendingTurns.Dequeue();
+        networkPlayer.HandleTurn(turn);
     }
 
     void onMessageRecieve(ServerMessage msg)
@@ -197,6 +218,21 @@ public class ConnectionManager : MonoBehaviour
             case MessageTypes.UPDATE:
                 var update = ((JObject)msg.payload).ToObject<UpdatePayload>();
                 HandleUpdate(update);
+                break;
+
+            case MessageTypes.PLAYER_MOVE:
+                var move = ((JObject)msg.payload).ToObject<InputPayload>();
+                HandlePlayerMove(move);
+                break;
+
+            case MessageTypes.NEW_MAP:
+                var newMap = ((JObject)msg.payload).ToObject<NewMapPayload>();
+                pathSpawner.instance.UpdatePath(newMap.extension);
+                break;
+
+            case MessageTypes.GAME_OVER:
+                var gameOver = ((JObject)msg.payload).ToObject<GameOverPayload>();
+                HandleGameOver(gameOver);
                 break;
         }
     }

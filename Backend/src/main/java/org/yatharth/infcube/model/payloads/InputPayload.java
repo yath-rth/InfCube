@@ -9,5 +9,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class InputPayload {
     public int side;
-
+    public int tileCount;
+    public int posX;
+    public int posZ;
 }

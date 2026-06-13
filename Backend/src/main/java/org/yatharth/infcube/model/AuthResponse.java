@@ -7,6 +7,5 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class Tile {
-    public Vector3 position;
+public class AuthResponse {
 }

@@ -19,11 +19,7 @@ public class InputManager : MonoBehaviour
 
         controls = new Controls();
 
-        controls.movement.turn_singlePlayer.performed += ctx =>
-        {
-            player.turn();
-            connectionManager.SendMoveInput(player.side);
-        };
+        controls.movement.turn_singlePlayer.performed += ctx => player.turn();
         controls.movement.escape.performed += ctx => gameManager.close();
         controls.movement.mainMenu.performed += ctx => gameManager.mainMenu();
         controls.movement.space.performed += ctx => gameManager.restart();

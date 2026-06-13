@@ -13,7 +13,7 @@ public class DecreaseSpeed : ItemEffectBase
             Player player = GameObject.FindWithTag("Player").GetComponent<Player>();
             if (player != null)
             {
-                player.DecreaseSpeed(speedDecreaseAmount);
+                // player.DecreaseSpeed(speedDecreaseAmount);
             }
         }
     }

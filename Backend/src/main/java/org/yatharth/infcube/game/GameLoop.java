@@ -5,23 +5,22 @@ import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
-import tools.jackson.databind.ObjectMapper;
 
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.*;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 
 @Component
 @RequiredArgsConstructor
 public class GameLoop {
 
+    private static final String ROOM_ID = GameConstants.TESTING_ROOM_ID;
     private final GameController gameController;
-
+    private final MatchStore matchStore;
     private final ScheduledExecutorService scheduler
             = Executors.newSingleThreadScheduledExecutor();
-
     private ScheduledFuture<?> loop;
-    private static final String ROOM_ID = GameConstants.TESTING_ROOM_ID;
 
     @PostConstruct
     public void start() {
@@ -43,7 +42,9 @@ public class GameLoop {
 
     private void tick() {
         try {
-            gameController.updateAll();
+            for (String matchId : matchStore.getAllMatchIds()) {
+                gameController.updateMatch(matchId);
+            }
         } catch (Exception e) {
             System.err.println("Tick error: " + e.getMessage());
             e.printStackTrace();

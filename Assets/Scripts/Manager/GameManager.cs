@@ -135,6 +135,7 @@ public class GameManager : MonoBehaviour
     {
         gameState = 0;
         isGameOver = true;
+        ConnectionManager.instance.Disconnect();
 
         if (SaveManager.Instance != null) SaveManager.Instance.SaveData();
         if (LeaderboardManager.instance != null && PointsManager.instance != null) LeaderboardManager.instance.AddPlayerScore(PointsManager.instance.highScore);
@@ -176,7 +177,7 @@ public class GameManager : MonoBehaviour
         restart();
     }
 
-    private void OnPlayerDied()
+    public void OnPlayerDied()
     {
         StartCoroutine(GameOver());
     }

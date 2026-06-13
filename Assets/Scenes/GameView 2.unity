@@ -572,6 +572,7 @@ GameObject:
   - component: {fileID: 150160661}
   - component: {fileID: 150160662}
   - component: {fileID: 150160663}
+  - component: {fileID: 150160664}
   m_Layer: 0
   m_Name: Connection Manager
   m_TagString: Untagged
@@ -626,6 +627,19 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::MatchMaking
   matchmakingUI: {fileID: 0}
   foundUI: {fileID: 0}
+--- !u!114 &150160664
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 150160660}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cfd0745c2b2924f459a5beb1dac8c03a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PositionTransmitter
+  sendInterval: 0.5
 --- !u!1 &174115387
 GameObject:
   m_ObjectHideFlags: 0
@@ -3268,8 +3282,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   player: {fileID: 8088208788021677047}
   tileSize: 1.25
-  minLength_min: 1
-  maxLength_max: 4
   tilesAhead: 1.3
   spawnTimeCurve:
     serializedVersion: 2
@@ -3297,7 +3309,6 @@ MonoBehaviour:
     m_RotationOrder: 4
   startTile: {fileID: 419606169}
   ghost: 0
-  seed: 0
 --- !u!114 &611125900
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3311,14 +3322,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   items:
-  - StartSize: 1000
+  - StartSize: 200
     Prefab: {fileID: 2330495716966832453, guid: af71867a88c19194e9346227b0549841,
       type: 3}
   - StartSize: 10
     Prefab: {fileID: 1419521196644230744, guid: 46a9405d2b30a9d4fa5997987e9d8638,
-      type: 3}
-  - StartSize: 30
-    Prefab: {fileID: 7454290994359113681, guid: c9636c772fe0bc443af3108fe94b06c8,
       type: 3}
 --- !u!114 &611125901
 MonoBehaviour:
@@ -9529,8 +9537,8 @@ Transform:
   m_GameObject: {fileID: 1038699537}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: 0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: -0.13749482, z: -4.61}
-  m_LocalScale: {x: 4.4685736, y: 6.997457, z: 1.0935041}
+  m_LocalPosition: {x: 0, y: -0.24, z: -4.61}
+  m_LocalScale: {x: 4.4685736, y: 2.9739194, z: 1.0935041}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 3446459054175436998}
@@ -12174,7 +12182,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &1473153389
 Transform:
   m_ObjectHideFlags: 0
@@ -25748,7 +25756,6 @@ GameObject:
   - component: {fileID: 8088208788021677046}
   - component: {fileID: 8088208788021677047}
   - component: {fileID: 8088208788021677048}
-  - component: {fileID: 8088208788021677049}
   m_Layer: 6
   m_Name: Player
   m_TagString: Player
@@ -25792,28 +25799,16 @@ MonoBehaviour:
   cam: {fileID: 391557120}
   bgParticles: {fileID: 8999540553217143311}
   moveParticles: {fileID: 2654008761471957927}
-  minSpeed: 3.28
-  maxSpeed: 4.16
-  speedIncrement: 0.002
-  gravity: 11.2
-  rotationSpeed: 33.5
-  moving:
-    m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 611125899}
-        m_TargetAssemblyTypeName: pathSpawner, Assembly-CSharp
-        m_MethodName: move
-        m_Mode: 0
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
+  gravity: 11
+  rotationSpeed: 35
+  side: 0
+  temp_side: 0
   localMultiplayerMode: 0
   RightOrLeft: 0
+  autoTurn: 1
+  tileLayer:
+    serializedVersion: 2
+    m_Bits: 128
 --- !u!143 &8088208788021677048
 CharacterController:
   m_ObjectHideFlags: 0
@@ -25839,18 +25834,6 @@ CharacterController:
   m_SkinWidth: 0.08
   m_MinMoveDistance: 0.001
   m_Center: {x: 0, y: 0.49, z: 0}
---- !u!114 &8088208788021677049
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8088208788021677044}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9a521c4d62a64204dad3a9276465b60e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::NetworkPlayer
 --- !u!198 &8999540553217143305
 ParticleSystem:
   m_ObjectHideFlags: 0

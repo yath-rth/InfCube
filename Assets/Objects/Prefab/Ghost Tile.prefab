@@ -156,3 +156,4 @@ MonoBehaviour:
   poolIndex: 3
   fallerLayer: 12
   counterLayer: 20
+  ghost: 1

@@ -9,6 +9,7 @@ public class Tile : MonoBehaviour
     Rigidbody rb;
     [SerializeField] int poolIndex = 1;
     [SerializeField] int fallerLayer, counterLayer;
+    [SerializeField] bool ghost = false;
 
     private void Awake()
     {
@@ -52,7 +53,10 @@ public class Tile : MonoBehaviour
 
         if (other.gameObject.layer == counterLayer)
         {
-            if (GameManager.instance != null) PointsManager.instance.addScore(1);
+            if (!ghost)
+            {
+                if (GameManager.instance != null) PointsManager.instance.addScore(1);
+            }
         }
     }
 }

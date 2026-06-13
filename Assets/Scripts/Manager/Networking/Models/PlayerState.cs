@@ -5,9 +5,10 @@ using Newtonsoft.Json.Linq;
 [Serializable]
 public class PlayerState
 {
+    public String sessionId;
+    public String playerId;
     public float posX, posY, posZ;
     public float dirX, dirY, dirZ;
-    public float speed;
 
     public PlayerState() { }
 

@@ -8,7 +8,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Player {
+    public String sessionId;
+    public String playerId;
     public Vector3 position;
     public Vector3 direction;
-    public float speed;
 }

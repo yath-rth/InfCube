@@ -7,9 +7,10 @@ using Newtonsoft.Json.Linq;
 public class WelcomePayload
 {
     public string playerId;
+    public string otherId;
     public float spawnX, spawnY, spawnZ;
-    public List<PlayerState> players;
-    public int seed;
+    public Queue<PathInfo> path;
+    public float startSpeed;
 
     public WelcomePayload() { }
 
@@ -18,4 +19,11 @@ public class WelcomePayload
     {
         set { spawnX = (float)value["x"]; spawnY = (float)value["y"]; spawnZ = (float)value["z"]; }
     }
+}
+
+[Serializable]
+public class PathInfo
+{
+    public int side;
+    public int count;
 }
