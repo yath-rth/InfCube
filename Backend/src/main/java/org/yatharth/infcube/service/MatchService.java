@@ -1,8 +1,9 @@
-package org.yatharth.infcube.game;
+package org.yatharth.infcube.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.socket.WebSocketSession;
+import org.yatharth.infcube.game.*;
 import org.yatharth.infcube.model.Match;
 import org.yatharth.infcube.model.PathInfo;
 import org.yatharth.infcube.model.Player;
