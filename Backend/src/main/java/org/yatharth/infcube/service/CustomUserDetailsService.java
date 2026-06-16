@@ -6,7 +6,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.yatharth.infcube.data.UserRepository;
-import org.yatharth.infcube.model.User;
+import org.yatharth.infcube.model.auth.User;
 
 @Service
 @RequiredArgsConstructor

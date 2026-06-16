@@ -1,6 +1,6 @@
 package org.yatharth.infcube.game;
 
-import org.yatharth.infcube.model.Vector3;
+import org.yatharth.infcube.model.game.Vector3;
 
 public class GameConstants {
 

@@ -1,9 +1,8 @@
 package org.yatharth.infcube.data;
 
 import org.springframework.stereotype.Repository;
-import org.yatharth.infcube.model.User;
+import org.yatharth.infcube.model.auth.User;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -12,8 +11,8 @@ public class UserRepository {
 
     public final Map<String, User> users = new ConcurrentHashMap<>();
 
-    public void save(User user) {
-        users.put(user.getUsername(), user);
+    public User save(User user) {
+        return users.put(user.getUsername(), user);
     }
 
     public User findByUsername(String username) {
@@ -24,4 +23,7 @@ public class UserRepository {
         return users.containsKey(username);
     }
 
+    public void remove(User user) {
+        users.remove(user.getUsername());
+    }
 }

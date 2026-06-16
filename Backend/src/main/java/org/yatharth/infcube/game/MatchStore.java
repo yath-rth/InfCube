@@ -1,9 +1,7 @@
 package org.yatharth.infcube.game;
 
 import org.springframework.stereotype.Repository;
-import org.yatharth.infcube.model.Match;
-import org.yatharth.infcube.model.PathInfo;
-import org.yatharth.infcube.model.Player;
+import org.yatharth.infcube.model.game.Match;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;

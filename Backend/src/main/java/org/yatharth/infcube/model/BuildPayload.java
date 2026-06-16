@@ -1,6 +1,9 @@
 package org.yatharth.infcube.model;
 
 import org.yatharth.infcube.game.GameConstants;
+import org.yatharth.infcube.model.game.Match;
+import org.yatharth.infcube.model.game.Player;
+import org.yatharth.infcube.model.game.ServerMessage;
 import org.yatharth.infcube.model.payloads.WelcomePayload;
 
 public class BuildPayload {

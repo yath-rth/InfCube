@@ -1,4 +1,4 @@
-package org.yatharth.infcube.model;
+package org.yatharth.infcube.model.auth;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -7,8 +7,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class User {
-    private String userId;
+public class UserCredentials {
     private String username;
-    private String passwordHash;
+    private String password;
 }

@@ -1,4 +1,4 @@
-package org.yatharth.infcube.model;
+package org.yatharth.infcube.model.game;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

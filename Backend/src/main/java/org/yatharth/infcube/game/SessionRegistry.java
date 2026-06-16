@@ -3,7 +3,6 @@ package org.yatharth.infcube.game;
 
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.WebSocketSession;
-import org.yatharth.infcube.model.Player;
 
 import java.util.List;
 import java.util.Map;
@@ -15,6 +14,7 @@ public class SessionRegistry {
 
     private final Map<String, WebSocketSession> sessions = new ConcurrentHashMap<>();
     private final Map<String, String> sessionToMatch = new ConcurrentHashMap<>();
+    private final Map<String, String> userToSession = new ConcurrentHashMap<>();
 
     public void add(WebSocketSession session) {
         sessions.put(session.getId(), session);

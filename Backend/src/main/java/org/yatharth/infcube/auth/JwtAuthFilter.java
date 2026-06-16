@@ -1,4 +1,4 @@
-package org.yatharth.infcube.config;
+package org.yatharth.infcube.auth;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;

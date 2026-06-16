@@ -4,9 +4,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.socket.WebSocketSession;
 import org.yatharth.infcube.game.*;
-import org.yatharth.infcube.model.Match;
-import org.yatharth.infcube.model.PathInfo;
-import org.yatharth.infcube.model.Player;
+import org.yatharth.infcube.model.game.Match;
+import org.yatharth.infcube.model.game.PathInfo;
+import org.yatharth.infcube.model.game.Player;
 
 import java.util.List;
 import java.util.Random;

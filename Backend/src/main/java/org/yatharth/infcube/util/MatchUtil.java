@@ -1,9 +1,8 @@
 package org.yatharth.infcube.util;
 
-import org.yatharth.infcube.model.Match;
-import org.yatharth.infcube.model.Player;
+import org.yatharth.infcube.model.game.Match;
+import org.yatharth.infcube.model.game.Player;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class MatchUtil {

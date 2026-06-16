@@ -3,9 +3,8 @@ package org.yatharth.infcube.model.payloads;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.yatharth.infcube.model.Player;
-import org.yatharth.infcube.model.PathInfo;
-import org.yatharth.infcube.model.Vector3;
+import org.yatharth.infcube.model.game.PathInfo;
+import org.yatharth.infcube.model.game.Vector3;
 
 import java.util.List;
 

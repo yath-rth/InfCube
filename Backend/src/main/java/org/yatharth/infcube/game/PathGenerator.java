@@ -1,7 +1,7 @@
 package org.yatharth.infcube.game;
 
 import org.springframework.stereotype.Component;
-import org.yatharth.infcube.model.PathInfo;
+import org.yatharth.infcube.model.game.PathInfo;
 
 import java.util.ArrayList;
 import java.util.List;

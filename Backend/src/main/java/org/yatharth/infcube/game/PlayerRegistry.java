@@ -1,8 +1,8 @@
 package org.yatharth.infcube.game;
 
 import org.springframework.stereotype.Component;
-import org.yatharth.infcube.model.Player;
-import org.yatharth.infcube.model.Vector3;
+import org.yatharth.infcube.model.game.Player;
+import org.yatharth.infcube.model.game.Vector3;
 
 import java.util.List;
 import java.util.Map;

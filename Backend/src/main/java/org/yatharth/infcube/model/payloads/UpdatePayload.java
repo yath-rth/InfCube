@@ -3,7 +3,7 @@ package org.yatharth.infcube.model.payloads;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.yatharth.infcube.model.Player;
+import org.yatharth.infcube.model.game.Player;
 
 import java.util.List;
 

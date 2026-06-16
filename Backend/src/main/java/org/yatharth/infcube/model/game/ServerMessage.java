@@ -1,15 +1,13 @@
-package org.yatharth.infcube.model;
+package org.yatharth.infcube.model.game;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 @Data
 @AllArgsConstructor
-@NoArgsConstructor
-public class ClientMessage {
+public class ServerMessage {
     public String type;
     public String roomId;
-    public String playerId;
+    public Long timestamp;
     public Object payload;
 }

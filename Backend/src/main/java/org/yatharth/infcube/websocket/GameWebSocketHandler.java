@@ -1,4 +1,4 @@
-package org.yatharth.infcube.config;
+package org.yatharth.infcube.websocket;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -7,7 +7,7 @@ import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 import org.yatharth.infcube.game.GameController;
-import org.yatharth.infcube.model.ClientMessage;
+import org.yatharth.infcube.model.game.ClientMessage;
 import tools.jackson.databind.ObjectMapper;
 
 @Component
@@ -24,9 +24,13 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
 
     @Override
     public void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
-        ClientMessage decodedMsg = objectMapper.readValue(message.getPayload(), ClientMessage.class);
+        ClientMessage decodedMsg = objectMapper.readValue(
+                message.getPayload(),
+                ClientMessage.class
+        );
 //        System.out.println("Received message type: " + decodedMsg.getType() + " message: " + decodedMsg.toString());
 
+        if (decodedMsg.type == null) return;
         switch (decodedMsg.type) {
             case "input" -> gameController.handleInput(session, decodedMsg);
             case "join" -> gameController.handleJoin(session, decodedMsg);
