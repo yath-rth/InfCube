@@ -31,6 +31,8 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/auth/**").permitAll()
                         .requestMatchers("/admin/**").hasRole("ADMIN")
+//                        .requestMatchers("/game").permitAll() // Important: only for dev, allows
+//                        // anyone to connect on the internet
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(sess -> sess

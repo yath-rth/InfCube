@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -29,6 +30,14 @@ public class InputManager : MonoBehaviour
         };
         controls.movement.leaderboard.performed += ctx => gameManager.showLeaderboard();
         controls.movement.shop.performed += ctx => gameManager.shop();
+
+        StartCoroutine(startGameTest());
+    }
+
+    IEnumerator startGameTest()
+    {
+        yield return new WaitForSeconds(4f);
+        if (sceneManager.GameState != 1) matchMaking.StartSearch();
     }
 
     void OnEnable()

@@ -4,7 +4,7 @@ using System;
 public class PointsManager : MonoBehaviour, ISaveFuncs
 {
     public static PointsManager instance;
-    [SerializeField] string saveName => "PointsManager";
+    string saveName => "PointsManager";
 
     public Action<int> coinAddedEvent, scoreAddedEvent;
 

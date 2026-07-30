@@ -51,5 +51,6 @@
         "temp/": true,
         "Temp/": true
     },
-    "dotnet.defaultSolution": "InfCube.sln"
+    "dotnet.defaultSolution": "InfCube.slnx",
+    "java.compile.nullAnalysis.mode": "automatic"
 }
