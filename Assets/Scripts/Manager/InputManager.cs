@@ -31,7 +31,7 @@ public class InputManager : MonoBehaviour
         controls.movement.leaderboard.performed += ctx => gameManager.showLeaderboard();
         controls.movement.shop.performed += ctx => gameManager.shop();
 
-        StartCoroutine(startGameTest());
+        // StartCoroutine(startGameTest());
     }
 
     IEnumerator startGameTest()

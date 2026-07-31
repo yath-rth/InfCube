@@ -45,8 +45,8 @@ Material:
     - _QueueOffset: 0
     - _XRMotionVectorsPass: 1
     m_Colors:
-    - _HorizonColor: {r: 0.9294118, g: 0.34117648, b: 0.50980395, a: 0}
-    - _SkyColor: {r: 0.45882356, g: 0.8588236, b: 0.72156864, a: 0}
+    - _HorizonColor: {r: 0.8, g: 0.2824634, b: 0.2588236, a: 0}
+    - _SkyColor: {r: 0.7647059, g: 0.76124066, b: 0.18823528, a: 0}
     - _Stars_Color: {r: 0.99999994, g: 0.99999994, b: 0.99999994, a: 0}
   m_BuildTextureStacks: []
   m_AllowLocking: 1

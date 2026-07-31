@@ -410,7 +410,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 39070416}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 150160665}
+        m_TargetAssemblyTypeName: Auth, Assembly-CSharp
+        m_MethodName: OnRegisterButton
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &39070416
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -833,6 +845,7 @@ GameObject:
   - component: {fileID: 150160662}
   - component: {fileID: 150160663}
   - component: {fileID: 150160664}
+  - component: {fileID: 150160665}
   m_Layer: 0
   m_Name: Connection Manager
   m_TagString: Untagged
@@ -900,6 +913,22 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PositionTransmitter
   sendInterval: 0.5
+--- !u!114 &150160665
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 150160660}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0a92abc381913d848b2924fb62d3431a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Auth
+  authUI: {fileID: 1710401064}
+  usernameInput: {fileID: 1990515175}
+  passwordInput: {fileID: 1990429090}
+  baseUrl: http://localhost:8080
 --- !u!1 &174115387
 GameObject:
   m_ObjectHideFlags: 0
@@ -9609,7 +9638,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 842614907}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 150160665}
+        m_TargetAssemblyTypeName: Auth, Assembly-CSharp
+        m_MethodName: OnLoginButton
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &842614907
 MonoBehaviour:
   m_ObjectHideFlags: 0

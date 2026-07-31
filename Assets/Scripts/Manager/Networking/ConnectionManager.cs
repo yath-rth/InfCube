@@ -41,27 +41,33 @@ public class ConnectionManager : MonoBehaviour
         {
             bool connected = false;
 
-            ws = new WebSocket("ws://localhost:8080/game");
-
-            ws.OnOpen += () =>
+            if (Auth.instance.isAuthenticated)
             {
-                connected = true;
-                Debug.Log("WebSocket connected");
-            };
+                ws = new WebSocket("ws://localhost:8080/game", new Dictionary<string, string>
+                {
+                    { "Authorization", "Bearer " + Auth.instance.token }
+                });
 
-            ws.OnMessage += (raw) =>
-            {
-                var message = System.Text.Encoding.UTF8.GetString(raw);
-                // Debug.Log("Message received: " + message);
-                var jsonMsg = JsonConvert.DeserializeObject<ServerMessage>(message);
-                onMessageRecieve(jsonMsg);
-            };
-            ws.OnError += (e) => Debug.LogError("WS Error: " + e);
-            ws.OnClose += (e) => Debug.Log("WS Closed");
+                ws.OnOpen += () =>
+                {
+                    connected = true;
+                    Debug.Log("WebSocket connected");
+                };
 
-            ws.Connect();  // non-blocking, fires OnOpen when ready
+                ws.OnMessage += (raw) =>
+                {
+                    var message = System.Text.Encoding.UTF8.GetString(raw);
+                    // Debug.Log("Message received: " + message);
+                    var jsonMsg = JsonConvert.DeserializeObject<ServerMessage>(message);
+                    onMessageRecieve(jsonMsg);
+                };
+                ws.OnError += (e) => Debug.LogError("WS Error: " + e);
+                ws.OnClose += (e) => Debug.Log("WS Closed");
 
-            yield return new WaitUntil(() => connected);
+                ws.Connect();  // non-blocking, fires OnOpen when ready
+
+                yield return new WaitUntil(() => connected);
+            }
         }
     }
 
