@@ -1,4 +1,10 @@
-FROM ubuntu:latest
-LABEL authors="thecr"
+FROM gradle:8-jdk17 AS build
+WORKDIR /app
+COPY . .
+RUN gradle clean build -x test
 
-ENTRYPOINT ["top", "-b"]
+FROM eclipse-temurin:17-jre
+WORKDIR /app
+COPY --from=build /app/build/libs/*.jar app.jar
+ENTRYPOINT ["java", "-jar", "app.jar"]
+EXPOSE 8080

@@ -9,13 +9,13 @@ using TMPro;
 public class ConnectionManager : MonoBehaviour
 {
     public static ConnectionManager instance;
+    public bool isConnected {private set; get;}
     WebSocket ws;
     public string url, playerId;
     public string roomId;
     [SerializeField] GameObject playerPrefab;
     List<NetworkPlayer> remotePlayers = new List<NetworkPlayer>();
     bool hasPlayerId = false, hasJoined = false;
-
     [SerializeField] TMP_Text roomIdText;
 
     private void Awake()
@@ -39,7 +39,7 @@ public class ConnectionManager : MonoBehaviour
     {
         if (ws == null)
         {
-            bool connected = false;
+            isConnected = false;
 
             if (Auth.instance.isAuthenticated)
             {
@@ -50,7 +50,7 @@ public class ConnectionManager : MonoBehaviour
 
                 ws.OnOpen += () =>
                 {
-                    connected = true;
+                    isConnected = true;
                     Debug.Log("WebSocket connected");
                 };
 
@@ -64,9 +64,9 @@ public class ConnectionManager : MonoBehaviour
                 ws.OnError += (e) => Debug.LogError("WS Error: " + e);
                 ws.OnClose += (e) => Debug.Log("WS Closed");
 
-                ws.Connect();  // non-blocking, fires OnOpen when ready
+                ws.Connect();
 
-                yield return new WaitUntil(() => connected);
+                yield return new WaitUntil(() => isConnected);
             }
         }
     }
