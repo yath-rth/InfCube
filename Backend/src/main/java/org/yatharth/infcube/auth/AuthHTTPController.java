@@ -27,16 +27,16 @@ public class AuthHTTPController {
 
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody UserCredentials credentials) {
-        if (userRepository.existsByUsername(credentials.getUsername()))
+        User user = userRepository.findByUsername(credentials.getUsername()).orElse(null);
+        if (user != null)
             return ResponseEntity.badRequest().body("Username already exists");
 
-        userRepository.save(new User(
-                UUID.randomUUID().toString(),
-                credentials.getUsername(),
-                passwordEncoder.encode(credentials.getPassword())
-        ));
+        user = userRepository.save(User.builder()
+                .userId(UUID.randomUUID().toString())
+                .username(credentials.getUsername())
+                .passwordHash(passwordEncoder.encode(credentials.getPassword()))
+                .build());
 
-        User user = userRepository.findByUsername(credentials.getUsername());
         String token = jwtService.generateToken(user.getUsername());
         String refreshToken = authService.createSession(user.getUserId());
 
@@ -45,7 +45,7 @@ public class AuthHTTPController {
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody UserCredentials credentials) {
-        User user = userRepository.findByUsername(credentials.getUsername());
+        User user = userRepository.findByUsername(credentials.getUsername()).orElse(null);
         if (user == null)
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
         if (!passwordEncoder.matches(credentials.getPassword(), user.getPasswordHash()))
@@ -61,7 +61,7 @@ public class AuthHTTPController {
     @PostMapping("/refresh")
     public ResponseEntity<?> refresh(@RequestBody RefreshRequest request) {
         String username = jwtService.extractUsername(request.getToken());
-        User user = userRepository.findByUsername(username);
+        User user = userRepository.findByUsername(username).orElse(null);
         if (user == null)
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
 
@@ -76,7 +76,11 @@ public class AuthHTTPController {
     public ResponseEntity<?> logout(@RequestHeader("Authorization") String authHeader) {
         String token = authHeader.substring(7);
         String username = jwtService.extractUsername(token);
-        User user = userRepository.findByUsername(username);
+
+        User user = userRepository.findByUsername(username).orElse(null);
+        if (user == null)
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
+
         authService.deleteSession(user.getUserId());
         return ResponseEntity.ok("Logged out");
     }
